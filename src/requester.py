@@ -14,3 +14,12 @@ class Requester:
             self.my_host + '/api/v2/projects/' + self.my_project + '/feeds/events.xml',
             auth=self.my_auth)
         return response.content
+
+    def get_cards_by_mql(self, mql):
+        json_body = '{"mql":"' + mql + '"}'
+        response = requests.request(
+            method='GET',
+            url=self.my_host + '/api/v2/projects/' + self.my_project + '/cards/execute_mql.xml',
+            auth=self.my_auth,
+            data=json_body)
+        return response.content
