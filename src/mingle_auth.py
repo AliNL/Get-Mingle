@@ -12,6 +12,9 @@ class MingleAuth:
 
     def __call__(self, request):
         path = urlparse(request.url).path
+        query = urlparse(request.url).query
+        if query:
+            path += '?' + query
         timestamp = datetime.datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S UTC')
         if request.body:
             request.headers['content-type'] = 'application/json'
