@@ -9,7 +9,7 @@ class Requester:
         self.my_host = host
         self.my_project = project
 
-    def get_events(self, url):
+    def get_events(self, url=None):
         if url:
             response = requests.get(
                 url, auth=self.my_auth)
