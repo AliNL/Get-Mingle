@@ -1,5 +1,0 @@
-auth_info:
-  host: https://XXXXXX.com
-  project: project_name
-  user_name: your_user_name
-  secret_key: your_secret_key

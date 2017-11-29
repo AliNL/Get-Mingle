@@ -1,0 +1,17 @@
+auth_info:
+  host: https://XXXXXX.com
+  project: project_name
+  user_name: your_user_name
+  secret_key: your_secret_key
+query_info:
+  status:
+    0: Backlog
+    1: Blocked
+    2: In analysis
+    3: Analysis complete
+    4: Ready for Dev
+    5: In-Progress
+    6: Dev complete
+    7: Ready for QA
+    8: In QA
+    9: QA complete
