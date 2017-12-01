@@ -9,18 +9,12 @@
             margin: 10px 0;
         }
 
-        hr {
-            color: #9B9B9B;
-            background-color: #9B9B9B;
-            border-color: #9B9B9B
-        }
-
         div.content {
             min-width: 750px;
             max-width: 1024px;
             margin: 0 auto;
             padding: 20px 50px;
-            background-color: #ECECEC;
+            background-color: rgba(236,236,236,1);
         }
 
         div.content-header {
@@ -35,7 +29,7 @@
             border-radius: 0;
             width: 150px;
             height: 32px;
-            background-color: #6DC4CB;
+            background-color: rgba(109, 196, 203, 1);
             color: white;
             font-size: 16px;
             font-weight: 500;
@@ -43,7 +37,7 @@
         }
 
         div.switch-box button:hover {
-            background-color: #16AFC2;
+            background-color: rgba(22, 175, 194, 1);
             cursor: pointer;
         }
 
@@ -78,18 +72,40 @@
         div.status-toggle:hover {
             cursor: pointer;
         }
+
+        table {
+            margin: 10px 0;
+            width: 100%;
+        }
+
+        table td, table th {
+            font-size: 14px;
+            padding: 5px 15px;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        table td {
+            font-weight: normal;
+        }
+        table a {
+            color: black;
+            text-decoration: none;
+        }
+
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
 </head>
 <body style="margin: 0;">
 <header></header>
-<div id="card-status-durations" style="background-color: #ECECEC;">
+<div id="card-status-durations" style="background-color: rgba(236,236,236,1);">
     <div class="content">
         <div class="content-header">
             <h2>Card Status Durations</h2>
             <div class="switch-box" style="font-size: 0;">
                 <button class="switch-box-btn" onclick="switchChartAndData(1, this)"
-                        style="background-color: #16AFC2;">Chart
+                        style="background-color: rgba(22,175,194,1);">Chart
                 </button>
                 <button class="switch-box-btn" onclick="switchChartAndData(0, this)">Data</button>
             </div>
@@ -99,15 +115,15 @@
         <div class="status-duration-info">
             <canvas id="statusDurationsChart"></canvas>
         </div>
-        <div class="status-duration-info" style="display: none">
-            Data
+        <div class="status-duration-info" style="display: none; overflow-x: auto;">
+            <table id="statusDurationsData"></table>
         </div>
     </div>
 </div>
 <script type="text/javascript">
     function switchChartAndData(id, element) {
-        document.getElementsByClassName("switch-box-btn")[id].style.backgroundColor = "#6DC4CB";
-        element.style.backgroundColor = "#16AFC2";
+        document.getElementsByClassName("switch-box-btn")[id].style.backgroundColor = "rgba(109, 196, 203, 1)";
+        element.style.backgroundColor = "rgba(22,175,194,1)";
         document.getElementsByClassName("status-duration-info")[id].style.display = "none";
         document.getElementsByClassName("status-duration-info")[1 - id].style.display = "block";
     }
@@ -116,12 +132,13 @@
         if (colorCheckBox.style.backgroundColor === "transparent") {
             colorCheckBox.style.backgroundColor = colorCheckBox.style.borderColor;
             statusDurationsChart.data.datasets[statusId].hidden = false;
-            statusDurationsChart.update()
+            statusDurationsChart.update();
         } else {
             colorCheckBox.style.backgroundColor = "transparent";
             statusDurationsChart.data.datasets[statusId].hidden = true;
-            statusDurationsChart.update()
+            statusDurationsChart.update();
         }
+        $('th:nth-child(' + (statusId + 2) + '),td:nth-child(' + (statusId + 2) + ')').toggle(200);
     }
     var statusDurationDetails = document.getElementById("statusDurationsChart");
     var statusDurationsChart = new Chart(statusDurationDetails, {
