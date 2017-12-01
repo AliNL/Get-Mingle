@@ -47,6 +47,10 @@
             cursor: pointer;
         }
 
+        div.switch-box button:focus {
+            outline: none;
+        }
+
         div.status-toggles {
             display: flex;
             flex-wrap: wrap;
@@ -80,7 +84,7 @@
 <body style="margin: 0;">
 <header></header>
 <div id="card-status-durations" style="background-color: #ECECEC;">
-    <div class="content" style="position: relative;">
+    <div class="content">
         <div class="content-header">
             <h2>Card Status Durations</h2>
             <div class="switch-box" style="font-size: 0;">
@@ -93,7 +97,7 @@
         <div class="status-toggles" style="margin: 0 -10px;"></div>
         <hr>
         <div class="status-duration-info">
-            <canvas id="statusDurationsChart" height="80"></canvas>
+            <canvas id="statusDurationsChart"></canvas>
         </div>
         <div class="status-duration-info" style="display: none">
             Data
@@ -119,7 +123,7 @@
             statusDurationsChart.update()
         }
     }
-    var statusDurationDetails = document.getElementsByTagName("canvas")[0];
+    var statusDurationDetails = document.getElementById("statusDurationsChart");
     var statusDurationsChart = new Chart(statusDurationDetails, {
         type: 'horizontalBar',
         data: {

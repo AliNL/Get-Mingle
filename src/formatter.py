@@ -49,6 +49,7 @@ class Formatter:
         data_str = self._get_data_str_from_all_data(all_data)
         script_tag.insert_before('var card_numbers = ' + labels + ';')
         script_tag.insert_before('var all_data = ' + data_str + ';')
+        self.template.find('canvas')['height'] = str(len(changes) * 15)
 
     @staticmethod
     def _get_status_and_time_from_entry(entry):
