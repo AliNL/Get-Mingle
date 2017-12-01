@@ -5,12 +5,12 @@ from bs4 import BeautifulSoup
 class Formatter:
     def __init__(self, template: BeautifulSoup):
         self.template = template
-        self.colors = ['#E57373', '#BA68C8', '#7986CB',
-                       '#4FC3F7', '#4DB6AC', '#AED581',
-                       '#FFF176', '#FFB74D', '#F06292',
-                       '#9575CD', '#64B5F6', '#4DD0E1',
-                       '#81C784', '#DCE775', '#FFD54F',
-                       '#FF8A65']
+        self.colors = ['rgba(229,115,115,1)', 'rgba(186,104,200,1)', 'rgba(121,134,203,1)',
+                       'rgba(79,195,247,1)', 'rgba(77,182,172,1)', 'rgba(174,213,129,1)',
+                       'rgba(255,241,118,1)', 'rgba(255,183,77,1)', 'rgba(240,98,146,1)',
+                       'rgba(149,117,205,1)', 'rgba(100,181,246,1)', 'rgba(77,208,225,1)',
+                       'rgba(129,199,132,1)', 'rgba(220,231,117,1)', 'rgba(255,213,79,1)',
+                       'rgba(255,138,101,1)']
 
     def format_status_toggles(self, status):
         parent_tag = self.template.find('div', class_='status-toggles')
@@ -42,7 +42,7 @@ class Formatter:
                 this_status, this_time = self._get_status_and_time_from_entry(entry)
                 if this_status:
                     if this_status in status.values():
-                        time_delta = int((this_time - last_time) / (36 * 24)) / 100
+                        time_delta = round((this_time - last_time) / (3600 * 24), 2)
                         all_data[this_status][i] += time_delta
                 last_time = this_time or last_time
             i += 1
@@ -50,6 +50,52 @@ class Formatter:
         script_tag.insert_before('var card_numbers = ' + labels + ';')
         script_tag.insert_before('var all_data = ' + data_str + ';')
         self.template.find('canvas')['height'] = str(len(changes) * 15)
+        return all_data
+
+    def format_card_status_data(self, all_data, status, cards, url):
+        table_tag = self.template.find('table', id='statusDurationsData')
+        tr_tag = self.template.new_tag('tr')
+        th_tag = self.template.new_tag('th')
+        th_tag.string = 'Card'
+        th_tag['style'] = 'background-color: rgba(109,196,203,1); border: solid #ECECEC 1px;'
+        tr_tag.append(th_tag)
+        for status_key in status:
+            th_tag = self.template.new_tag('th')
+            th_tag.string = status[status_key]
+            color = self.colors[status_key]
+            th_tag['style'] = f'background-color: {color}; border: solid #ECECEC 1px;'
+            tr_tag.append(th_tag)
+        table_tag.append(tr_tag)
+
+        tr_list = []
+        for card in cards:
+            tr_tag = self.template.new_tag('tr')
+            td_tag = self.template.new_tag('td')
+            td_tag['style'] = 'background-color: rgba(109,196,203,0.3); border: solid #ECECEC 1px;'
+            a_tag = self.template.new_tag('a')
+            a_tag.string = '#' + card
+            a_tag['title'] = cards[card]
+            a_tag['href'] = url + '/' + card
+            td_tag.append(a_tag)
+            tr_tag.append(td_tag)
+            tr_list.append(tr_tag)
+
+        j = 0
+        for data in all_data:
+            i = 0
+            for duration in all_data[data]:
+                span_tag = self.template.new_tag('span')
+                span_tag.string = '%.2f' % duration
+                td_tag = self.template.new_tag('td')
+                color = self.colors[j].replace('1)','0.3)')
+                td_tag['style'] = f'background-color: {color}; border: solid #ECECEC 1px;'
+                td_tag.append(span_tag)
+                tr_list[i].append(td_tag)
+                i += 1
+            j += 1
+
+        for tr_tag in tr_list:
+            table_tag.append(tr_tag)
 
     @staticmethod
     def _get_status_and_time_from_entry(entry):
