@@ -1,10 +1,160 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="font-family: 'Open Sans', 'sans-serif';">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+    <title>Get Mingle</title>
+    <style>
+        h2 {
+            font-size: 24px;
+            margin: 10px 0;
+        }
 
+        hr {
+            color: #9B9B9B;
+            background-color: #9B9B9B;
+            border-color: #9B9B9B
+        }
+
+        div.content {
+            min-width: 750px;
+            max-width: 1024px;
+            margin: 0 auto;
+            padding: 20px 50px;
+            background-color: #ECECEC;
+        }
+
+        div.content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        div.switch-box button {
+            margin: 0;
+            border: none;
+            border-radius: 0;
+            width: 150px;
+            height: 32px;
+            background-color: #6DC4CB;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            display: inline;
+        }
+
+        div.switch-box button:hover {
+            background-color: #16AFC2;
+            cursor: pointer;
+        }
+
+        div.status-toggles {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        span.color-check-box {
+            height: 12px;
+            width: 12px;
+            border-radius: 5px;
+            margin-right: 5px;
+            display: inline-block;
+        }
+
+        span.status-name {
+            font-size: 14px;
+        }
+
+        div.status-toggle {
+            font-size: 0;
+            align-items: center;
+            display: inline-flex;
+            padding: 5px 10px;
+        }
+
+        div.status-toggle:hover {
+            cursor: pointer;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+</head>
+<body style="margin: 0;">
+<header></header>
+<div id="card-status-durations" style="background-color: #ECECEC;">
+    <div class="content" style="position: relative;">
+        <div class="content-header">
+            <h2>Card Status Durations</h2>
+            <div class="switch-box" style="font-size: 0;">
+                <button class="switch-box-btn" onclick="switchChartAndData(1, this)"
+                        style="background-color: #16AFC2;">Chart
+                </button>
+                <button class="switch-box-btn" onclick="switchChartAndData(0, this)">Data</button>
+            </div>
+        </div>
+        <div class="status-toggles" style="margin: 0 -10px;"></div>
+        <hr>
+        <div class="status-duration-info">
+            <canvas id="statusDurationsChart" height="80"></canvas>
+        </div>
+        <div class="status-duration-info" style="display: none">
+            Data
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function switchChartAndData(id, element) {
+        document.getElementsByClassName("switch-box-btn")[id].style.backgroundColor = "#6DC4CB";
+        element.style.backgroundColor = "#16AFC2";
+        document.getElementsByClassName("status-duration-info")[id].style.display = "none";
+        document.getElementsByClassName("status-duration-info")[1 - id].style.display = "block";
+    }
+    function toggleStatus(statusId, element) {
+        var colorCheckBox = element.getElementsByClassName("color-check-box")[0];
+        if (colorCheckBox.style.backgroundColor === "transparent") {
+            colorCheckBox.style.backgroundColor = colorCheckBox.style.borderColor;
+            statusDurationsChart.data.datasets[statusId].hidden = false;
+            statusDurationsChart.update()
+        } else {
+            colorCheckBox.style.backgroundColor = "transparent";
+            statusDurationsChart.data.datasets[statusId].hidden = true;
+            statusDurationsChart.update()
+        }
+    }
+    var statusDurationDetails = document.getElementsByTagName("canvas")[0];
+    var statusDurationsChart = new Chart(statusDurationDetails, {
+        type: 'horizontalBar',
+        data: {
+            labels: card_numbers,
+            datasets: all_data
+        },
+        options: {
+            legend: false,
+            scales: {
+                xAxes: [{
+                    stacked: true,
+                    gridLines: {
+                        display: false
+                    },
+                    ticks: {
+                        display: false
+                    },
+                    display: false
+                }],
+                yAxes: [{
+                    stacked: true,
+                    barThickness: 24,
+                    gridLines: {
+                        display: false,
+                        color: "transparent"
+                    },
+                    ticks: {
+                        fontFamily: "Open Sans",
+                        fontColor: "black",
+                        fontSize: 14
+                    }
+                }]
+            }
+        }
+    });
+</script>
 </body>
 </html>
