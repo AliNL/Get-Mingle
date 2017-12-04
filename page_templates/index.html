@@ -4,6 +4,36 @@
     <meta charset="UTF-8">
     <title>Get Mingle</title>
     <style>
+        header div {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px;
+        }
+
+        header div a {
+            display: flex;
+            align-items: center;
+        }
+
+        header img#logo {
+            width: 50px;
+            height: auto;
+            margin-right: 10px;
+        }
+
+        header img#github {
+            width: 24px;
+            height: auto;
+            margin-right: 10px;
+        }
+
+        h1 {
+            display: inline-block;
+            font-size: 36px;
+            margin: 0;
+        }
+
         body {
             margin: 0;
             background-color: rgba(236, 236, 236, 1);
@@ -106,9 +136,13 @@
             font-weight: normal;
         }
 
-        table a {
+        a {
             color: black;
             text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
         }
 
     </style>
@@ -116,7 +150,18 @@
     <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
 </head>
 <body>
-<header></header>
+<header>
+    <div>
+        <img id="logo" src="logo.png">
+        <h1>Get Mingle</h1>
+    </div>
+    <div>
+        <a href="https://github.com/AliNL/Get-Mingle">
+            <img id="github" src="https://help.github.com/assets/images/site/invertocat.png">
+            <span>View on GitHub</span>
+        </a>
+    </div>
+</header>
 <div class="section" id="card-durations-section">
     <div class="content">
         <div class="content-header">
