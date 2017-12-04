@@ -1,3 +1,6 @@
+import os
+from urllib.parse import urlparse
+
 import requests
 
 from .mingle_auth import MingleAuth
@@ -11,8 +14,16 @@ class Requester:
 
     def get_events(self, url=None):
         if url:
+            query = urlparse(url).query
+            xml = 'result/caches/events-' + self.my_project + '-' + query + '.xml'
+            if os.path.exists(xml):
+                with open(xml, 'r') as f:
+                    cache_xml = f.read()
+                return cache_xml
             response = requests.get(
                 url, auth=self.my_auth)
+            with open(xml, 'w') as f:
+                f.write(response.content.decode())
         else:
             response = requests.get(
                 self.my_host + '/api/v2/projects/' + self.my_project + '/feeds/events.xml',
