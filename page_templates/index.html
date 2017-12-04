@@ -14,7 +14,7 @@
             max-width: 1024px;
             margin: 0 auto;
             padding: 20px 50px;
-            background-color: rgba(236,236,236,1);
+            background-color: white;
         }
 
         div.content-header {
@@ -23,7 +23,7 @@
             align-items: center;
         }
 
-        div.switch-box button {
+        div.switch-box button.switch-box-btn {
             margin: 0;
             border: none;
             border-radius: 0;
@@ -36,12 +36,15 @@
             display: inline;
         }
 
-        div.switch-box button:hover {
+        div.switch-box button.switch-box-btn.selected {
             background-color: rgba(22, 175, 194, 1);
+        }
+
+        div.switch-box button.switch-box-btn:hover {
             cursor: pointer;
         }
 
-        div.switch-box button:focus {
+        div.switch-box button.switch-box-btn:focus {
             outline: none;
         }
 
@@ -56,6 +59,10 @@
             border-radius: 5px;
             margin-right: 5px;
             display: inline-block;
+        }
+
+        span.color-check-box.removed {
+            background-color: transparent !important;
         }
 
         span.status-name {
@@ -83,11 +90,13 @@
             padding: 5px 15px;
             overflow: hidden;
             white-space: nowrap;
+            border: solid white 1px;
         }
 
         table td {
             font-weight: normal;
         }
+
         table a {
             color: black;
             text-decoration: none;
@@ -97,17 +106,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
     <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
 </head>
-<body style="margin: 0;">
+<body style="margin: 0; background-color:rgba(236, 236, 236,1)">
 <header></header>
-<div id="card-status-durations" style="background-color: rgba(236,236,236,1);">
+<div id="card-status-durations" style="background-color: white">
     <div class="content">
         <div class="content-header">
-            <h2>Card Status Durations</h2>
+            <h2>Card Durations</h2>
             <div class="switch-box" style="font-size: 0;">
-                <button class="switch-box-btn" onclick="switchChartAndData(1, this)"
-                        style="background-color: rgba(22,175,194,1);">Chart
-                </button>
-                <button class="switch-box-btn" onclick="switchChartAndData(0, this)">Data</button>
+                <button class="switch-box-btn selected">Chart</button>
+                <button class="switch-box-btn">Data</button>
             </div>
         </div>
         <div class="status-toggles" style="margin: 0 -10px;"></div>
@@ -121,61 +128,57 @@
     </div>
 </div>
 <script type="text/javascript">
-    function switchChartAndData(id, element) {
-        document.getElementsByClassName("switch-box-btn")[id].style.backgroundColor = "rgba(109, 196, 203, 1)";
-        element.style.backgroundColor = "rgba(22,175,194,1)";
-        document.getElementsByClassName("status-duration-info")[id].style.display = "none";
-        document.getElementsByClassName("status-duration-info")[1 - id].style.display = "block";
-    }
-    function toggleStatus(statusId, element) {
-        var colorCheckBox = element.getElementsByClassName("color-check-box")[0];
-        if (colorCheckBox.style.backgroundColor === "transparent") {
-            colorCheckBox.style.backgroundColor = colorCheckBox.style.borderColor;
-            statusDurationsChart.data.datasets[statusId].hidden = false;
-            statusDurationsChart.update();
-        } else {
-            colorCheckBox.style.backgroundColor = "transparent";
-            statusDurationsChart.data.datasets[statusId].hidden = true;
-            statusDurationsChart.update();
-        }
-        $('th:nth-child(' + (statusId + 2) + '),td:nth-child(' + (statusId + 2) + ')').toggle(200);
-    }
-    var statusDurationDetails = document.getElementById("statusDurationsChart");
-    var statusDurationsChart = new Chart(statusDurationDetails, {
-        type: 'horizontalBar',
-        data: {
-            labels: card_numbers,
-            datasets: all_data
-        },
-        options: {
-            legend: false,
-            scales: {
-                xAxes: [{
-                    stacked: true,
-                    gridLines: {
-                        display: false
-                    },
-                    ticks: {
-                        display: false
-                    },
-                    display: false
-                }],
-                yAxes: [{
-                    stacked: true,
-                    barThickness: 24,
-                    gridLines: {
-                        display: false,
-                        color: "transparent"
-                    },
-                    ticks: {
-                        fontFamily: "Open Sans",
-                        fontColor: "black",
-                        fontSize: 14
-                    }
-                }]
+    $(document).ready(function () {
+        $('div.switch-box').click(function () {
+            $('button.switch-box-btn').toggleClass('selected');
+            $('div.status-duration-info').toggle();
+        });
+        $('div.status-toggle').click(
+            function () {
+                var checkBox = $(this).find('span.color-check-box');
+                var statusId = parseInt($(this).attr('name'));
+                checkBox.toggleClass('removed');
+                statusDurationsChart.data.datasets[statusId].hidden = !!checkBox.hasClass('removed');
+                statusDurationsChart.update();
+                $('th:nth-child(' + (statusId + 2) + '),td:nth-child(' + (statusId + 2) + ')').toggle(200);
             }
-        }
-    });
+        );
+        var statusDurationsChart = new Chart($('canvas#statusDurationsChart'), {
+            type: 'horizontalBar',
+            data: {
+                labels: card_numbers,
+                datasets: all_data
+            },
+            options: {
+                legend: false,
+                scales: {
+                    xAxes: [{
+                        stacked: true,
+                        gridLines: {
+                            display: false
+                        },
+                        ticks: {
+                            display: false
+                        },
+                        display: false
+                    }],
+                    yAxes: [{
+                        stacked: true,
+                        barThickness: 24,
+                        gridLines: {
+                            display: false,
+                            color: "transparent"
+                        },
+                        ticks: {
+                            fontFamily: "Open Sans",
+                            fontColor: "black",
+                            fontSize: 14
+                        }
+                    }]
+                }
+            }
+        });
+    })
 </script>
 </body>
 </html>

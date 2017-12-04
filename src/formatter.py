@@ -17,7 +17,7 @@ class Formatter:
         for status_key in status:
             insert_tag = self.template.new_tag('div')
             insert_tag['class'] = 'status-toggle'
-            insert_tag['onclick'] = f'toggleStatus({status_key}, this)'
+            insert_tag['name'] = str(status_key)
             rect = self.template.new_tag('span')
             rect['class'] = 'color-check-box'
             color = self.colors[status_key]
@@ -47,8 +47,8 @@ class Formatter:
                 last_time = this_time or last_time
             i += 1
         data_str = self._get_data_str_from_all_data(all_data)
-        script_tag.insert_before('var card_numbers = ' + labels + ';')
-        script_tag.insert_before('var all_data = ' + data_str + ';')
+        script_tag.insert_before('\nvar card_numbers = ' + labels + ';')
+        script_tag.insert_before('\nvar all_data = ' + data_str + ';')
         self.template.find('canvas')['height'] = str(len(changes) * 15)
         return all_data
 
@@ -57,21 +57,28 @@ class Formatter:
         tr_tag = self.template.new_tag('tr')
         th_tag = self.template.new_tag('th')
         th_tag.string = 'Card'
-        th_tag['style'] = 'background-color: rgba(109,196,203,1); border: solid #ECECEC 1px;'
+        th_tag['style'] = 'background-color: rgba(109,196,203,1);'
         tr_tag.append(th_tag)
         for status_key in status:
             th_tag = self.template.new_tag('th')
             th_tag.string = status[status_key]
-            color = self.colors[status_key]
-            th_tag['style'] = f'background-color: {color}; border: solid #ECECEC 1px;'
+            th_tag['style'] = f'background-color: {self.colors[status_key]};'
             tr_tag.append(th_tag)
         table_tag.append(tr_tag)
+
+        avg_tr_tag = self.template.new_tag('tr')
+        avg_th_tag = self.template.new_tag('th')
+        avg_th_tag['style'] = 'background-color: rgba(109,196,203,1);'
+        avg_th_tag.string = 'Average'
+        avg_tr_tag.append(avg_th_tag)
+
+        table_tag.append(avg_tr_tag)
 
         tr_list = []
         for card in cards:
             tr_tag = self.template.new_tag('tr')
             td_tag = self.template.new_tag('td')
-            td_tag['style'] = 'background-color: rgba(109,196,203,0.3); border: solid #ECECEC 1px;'
+            td_tag['style'] = 'background-color: rgba(109,196,203,0.3);'
             a_tag = self.template.new_tag('a')
             a_tag.string = '#' + card
             a_tag['title'] = cards[card]
@@ -84,14 +91,15 @@ class Formatter:
         for data in all_data:
             i = 0
             for duration in all_data[data]:
-                span_tag = self.template.new_tag('span')
-                span_tag.string = '%.2f' % duration
                 td_tag = self.template.new_tag('td')
-                color = self.colors[j].replace('1)','0.3)')
-                td_tag['style'] = f'background-color: {color}; border: solid #ECECEC 1px;'
-                td_tag.append(span_tag)
+                td_tag.string = '%.2f' % duration
+                td_tag['style'] = f"background-color: {self.colors[j].replace('1)', '0.3)')};"
                 tr_list[i].append(td_tag)
                 i += 1
+            avg_th_tag = self.template.new_tag('th')
+            avg_th_tag.string = '%.2f' % (sum(all_data[data]) / len(all_data[data]))
+            avg_th_tag['style'] = f'background-color: {self.colors[j]};'
+            avg_tr_tag.append(avg_th_tag)
             j += 1
 
         for tr_tag in tr_list:
