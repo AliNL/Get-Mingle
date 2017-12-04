@@ -4,9 +4,18 @@
     <meta charset="UTF-8">
     <title>Get Mingle</title>
     <style>
+        body {
+            margin: 0;
+            background-color: rgba(236, 236, 236, 1);
+        }
+
         h2 {
             font-size: 24px;
             margin: 10px 0;
+        }
+
+        div.section {
+            background-color: white;
         }
 
         div.content {
@@ -106,9 +115,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
     <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
 </head>
-<body style="margin: 0; background-color:rgba(236, 236, 236,1)">
+<body>
 <header></header>
-<div id="card-status-durations" style="background-color: white">
+<div class="section" id="card-durations-section">
     <div class="content">
         <div class="content-header">
             <h2>Card Durations</h2>
