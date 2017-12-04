@@ -13,6 +13,8 @@ class Requester:
         self.my_project = project
 
     def get_events(self, url=None):
+        if not os.path.exists('result/caches'):
+            os.makedirs('result/caches')
         if url:
             query = urlparse(url).query
             xml = 'result/caches/events-' + self.my_project + '-' + query + '.xml'
