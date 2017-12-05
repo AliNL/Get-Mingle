@@ -1,19 +1,30 @@
+import codecs
+import shutil
+from datetime import datetime
+
+import os
 import yaml
-from src.requester import Requester
 from bs4 import BeautifulSoup
+
+from src.formatter import Formatter
+from src.requester import Requester
 
 
 class GetMingle:
     def __init__(self):
         with open('config.yml', 'r') as f:
             config = yaml.load(f)
-
-        host = config['auth_info']['host']
-        project = config['auth_info']['project']
+        self.host = config['auth_info']['host']
+        self.project = config['auth_info']['project']
         user_name = config['auth_info']['user_name']
         secret_key = config['auth_info']['secret_key']
+        self.requester = Requester(self.host, self.project, user_name, secret_key)
 
-        self.requester = Requester(host, project, user_name, secret_key)
+        with open('page_templates/index.html', 'r') as f:
+            template = BeautifulSoup(f.read(), 'html.parser')
+        self.template = template
+        self.formatter = Formatter(self.template)
+
         self.status = config['query_info']['status']
 
     @staticmethod
@@ -36,10 +47,11 @@ class GetMingle:
         xml = self.requester.get_cards_by_mql('SELECT Number, Name where Type = Iteration')
         return self._get_number_name_map_from_xml(xml)
 
-    def get_cards_map_by_iteration(self, iteration_number):
+    def get_cards_list_by_iteration(self, iteration_number):
         iteration_str = self._list_to_str(iteration_number)
         xml = self.requester.get_cards_by_mql(
-            "SELECT Number, Name where Status in ('Deployed to Prod','Done') and Iteration NUMBER in" + iteration_str)
+            "SELECT Number,Name where Status in ('Deployed to Prod','Done') and Iteration NUMBER in" + iteration_str)
+        # cards = self._get_number_name_map_from_xml(xml)
         return self._get_number_name_map_from_xml(xml)
 
     def get_changes_by_card_numbers(self, numbers):
@@ -53,29 +65,38 @@ class GetMingle:
             entries = soup.find_all('entry')
             for entry in entries:
                 card_title = entry.title.text
-                # print(card_title)
                 number_mark = card_title.find('#') + 1
                 card_number = card_title[number_mark:card_title.find(' ', number_mark)]
                 if card_number in numbers:
-                    # changes[card_number].append(entry)
-                    print(card_number)
-                    changes[card_number].append(entry.title.text)
+                    changes[card_number].append(entry)
                     if entry.find('change', type='card-creation'):
-                        print(card_number, entry.find('change', type='card-creation'))
                         not_finished.remove(card_number)
+                        changes[card_number].reverse()
                         if not not_finished:
                             break
-                        changes[card_number].reverse()
         return changes
+
+    def format_card_status_durations(self, cards, changes):
+        self.formatter.format_status_toggles(self.status)
+        all_data = self.formatter.format_card_status_durations(changes, self.status)
+        self.formatter.format_card_status_data(all_data, self.status, cards,
+                                               self.host + '/projects/' + self.project + '/cards')
+
+    def save_result(self):
+        directory_name = datetime.now().strftime('result/%Y-%m-%d-%H:%M:%S-result')
+        os.mkdir(directory_name)
+        with codecs.open(directory_name + '/index.html', 'w', encoding='utf8') as f:
+            f.write(str(self.template))
+        shutil.copyfile('page_templates/logo.png', directory_name + '/logo.png')
 
 
 def main():
     getter = GetMingle()
     iterations = getter.get_iterations_map()
-    cards = getter.get_cards_map_by_iteration(list(iterations.keys())[:2])
-    print(cards)
+    cards = getter.get_cards_list_by_iteration(list(iterations.keys())[:2])
     changes = getter.get_changes_by_card_numbers(list(cards.keys()))
-    print(changes)
+    getter.format_card_status_durations(cards, changes)
+    getter.save_result()
 
 
 if __name__ == '__main__':
