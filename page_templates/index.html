@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Get Mingle</title>
+    <link rel="icon" type="image/x-icon" href="logo.png" />
     <style>
         header div {
             display: flex;
@@ -34,18 +35,23 @@
             margin: 0;
         }
 
-        body {
-            margin: 0;
-            background-color: rgba(236, 236, 236, 1);
-        }
-
         h2 {
             font-size: 24px;
             margin: 10px 0;
         }
 
+        h3 {
+            font-size: 20px;
+        }
+
+        body {
+            margin: 0;
+            background-color: rgba(236, 236, 236, 1);
+        }
+
         div.section {
             background-color: white;
+            margin-bottom: 30px;
         }
 
         div.content {
@@ -60,6 +66,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+
+        div.iteration-summary-data {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        div.part {
+            display: inline-block;
         }
 
         div.switch-box button.switch-box-btn {
@@ -162,6 +177,34 @@
         </a>
     </div>
 </header>
+<div class="section" id="iteration-summary-section">
+    <div class="content">
+        <div class="content-header">
+            <h2>Iteration Summary</h2>
+        </div>
+        <hr/>
+        <div class="iteration-summary-data">
+            <div class="part">
+                <h2>Total Estimated Points: 8</h2>
+                <h2>Total Steps: 100</h2>
+            </div>
+            <div class="part" style="align-items: flex-end">
+                <h2>Total Days for "In-Progress": 18</h2>
+                <h2>Total Days for "In QA": 10</h2>
+            </div>
+        </div>
+        <div class="iteration-summary-chart">
+            <canvas id="iterationSummaryChart"></canvas>
+        </div>
+    </div>
+</div>
+<div class="section" id="whats-wrong-section">
+    <div class="content">
+        <div class="content-header">
+            <h2>What's Wrong</h2>
+        </div>
+    </div>
+</div>
 <div class="section" id="card-durations-section">
     <div class="content">
         <div class="content-header">
