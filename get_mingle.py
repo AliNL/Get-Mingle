@@ -87,7 +87,7 @@ class GetMingle:
         os.mkdir(directory_name)
         with codecs.open(directory_name + '/index.html', 'w', encoding='utf8') as f:
             f.write(str(self.template))
-        shutil.copyfile('page_templates/logo.png', directory_name + '/logo.png')
+        # shutil.copyfile('page_templates/logo.png', directory_name + '/logo.png')
 
 
 def main():
