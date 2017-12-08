@@ -2,11 +2,11 @@ from datetime import datetime, time, timedelta
 
 
 class Card:
-    def __init__(self, number, title, points, changes, interested_status, key_status):
+    def __init__(self, number, title, points, interested_status, key_status):
         self.number = number
         self.title = title
         self.points = points
-        self.changes = changes
+        self.changes = []
         self.key_status = key_status
         self.history = {}
         self.movement = []
