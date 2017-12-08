@@ -10,7 +10,7 @@ class Card:
         self.key_status = key_status
         self.history = {}
         self.movement = []
-        self.durations = {status: 0 for status in interested_status}
+        self.durations = {status: 0 for status in interested_status.values()}
         self.moved_back = False
         self.description_changed = False
 
@@ -46,11 +46,13 @@ class Card:
         last_time = None
         for this_time in self.history:
             this_status = self.history[this_time]
+            if this_status == 'description-change':
+                continue
+            this_time = datetime.fromtimestamp(this_time)
             if this_status in self.durations:
-                this_time = datetime.fromtimestamp(this_time)
                 time_delta = calculate_days_from_time(last_time, this_time)
                 self.durations[this_status] += time_delta
-            last_time = this_time or last_time
+            last_time = this_time
 
 
 def get_change_from_entry(entry):
@@ -65,7 +67,7 @@ def get_change_from_entry(entry):
 
 
 def calculate_days_from_time(last_time, this_time):
-    timed_delta = 0
+    timed_delta = timedelta(0)
     timed_delta += get_work_time(last_time, True)
     timed_delta += get_work_time(this_time, False)
 
@@ -74,7 +76,7 @@ def calculate_days_from_time(last_time, this_time):
         time_pointer += timedelta(1)
         if time_pointer.weekday() < 5:
             timed_delta += timedelta(0, 32400)
-    return timed_delta.total_seconds() / (3600 * 9)
+    return round(timed_delta.total_seconds() / (3600 * 9), 2)
 
 
 def get_work_time(this_time, is_start):

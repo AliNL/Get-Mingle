@@ -1,12 +1,13 @@
 import codecs
-import shutil
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import os
 import yaml
 from bs4 import BeautifulSoup
 
+from src.card import Card
 from src.formatter import Formatter
+from src.iteration import Iteration
 from src.requester import Requester
 
 
@@ -14,47 +15,49 @@ class GetMingle:
     def __init__(self):
         with open('config.yml', 'r') as f:
             config = yaml.load(f)
+        with open('page_templates/index.html', 'r') as f:
+            template = BeautifulSoup(f.read(), 'html.parser')
+
         self.host = config['auth_info']['host']
         self.project = config['auth_info']['project']
         user_name = config['auth_info']['user_name']
         secret_key = config['auth_info']['secret_key']
-        self.requester = Requester(self.host, self.project, user_name, secret_key)
-
-        with open('page_templates/index.html', 'r') as f:
-            template = BeautifulSoup(f.read(), 'html.parser')
+        url = self.host + '/projects/' + self.project + '/cards/'
         self.template = template
-        self.formatter = Formatter(self.template)
-
         self.status = config['query_info']['status']
 
-    @staticmethod
-    def _get_number_name_map_from_xml(xml: str):
+        self.requester = Requester(self.host, self.project, user_name, secret_key)
+        self.formatter = Formatter(self.template, self.status, url)
+
+    def get_current_iteration(self):
+        today = datetime.today()
+        this_monday = (today - timedelta(today.weekday())).strftime('%Y-%m-%d')
+        xml = self.requester.get_cards_by_mql(f"SELECT Number, Name where Name = '{this_monday}'")
         soup = BeautifulSoup(xml, 'xml')
-        the_map = {}
-        for result in soup.find_all('result'):
-            the_map[result.number.text] = result.find('name').text
-        return the_map
+        number = soup.find('number').string
+        title = soup.find('name').string
+        return Iteration(number, title, ['In-Progress', 'In QA'])
 
-    @staticmethod
-    def _list_to_str(ths_list):
-        string = '('
-        for s in ths_list:
-            string += s + ','
-        string = string[:-1] + ')'
-        return string
-
-    def get_iterations_map(self):
-        xml = self.requester.get_cards_by_mql('SELECT Number, Name where Type = Iteration')
-        return self._get_number_name_map_from_xml(xml)
-
-    def get_cards_list_by_iteration(self, iteration_number):
-        iteration_str = self._list_to_str(iteration_number)
+    def get_cards_by_iteration(self, iteration: Iteration):
         xml = self.requester.get_cards_by_mql(
-            "SELECT Number,Name where Status in ('Deployed to Prod','Done') and Iteration NUMBER in" + iteration_str)
-        # cards = self._get_number_name_map_from_xml(xml)
-        return self._get_number_name_map_from_xml(xml)
+            "SELECT Number,Name,'Estimated Points' " \
+            + "where Status in ('Deployed to Prod','Done') and Iteration = NUMBER " + iteration.number)
+        soup = BeautifulSoup(xml, 'xml')
+        cards = []
+        numbers = []
+        for result in soup.find_all('result'):
+            number = result.find('number').string
+            numbers.append(number)
+            title = result.find('name').string
+            points = result.find('estimated_points').string
+            cards.append(Card(number, title, points, self.status, 'In-Progress'))
+        changes = self._get_changes_by_card_numbers(numbers)
+        for card in cards:
+            card.changes = changes[card.number]
+            card.init()
+        return cards
 
-    def get_changes_by_card_numbers(self, numbers):
+    def _get_changes_by_card_numbers(self, numbers):
         not_finished = numbers[:]
         changes = {number: [] for number in numbers}
         next_page = None
@@ -76,26 +79,23 @@ class GetMingle:
                             break
         return changes
 
-    def format_card_status_durations(self, cards, changes):
-        self.formatter.format_status_toggles(self.status)
-        all_data = self.formatter.format_card_status_durations(changes, self.status)
-        self.formatter.format_card_status_data(all_data, self.status, cards,
-                                               self.host + '/projects/' + self.project + '/cards')
+    def format_card_status_durations(self, cards):
+        self.formatter.format_status_toggles()
+        self.formatter.format_card_durations_chart(cards)
+        self.formatter.format_card_durations_data(cards)
 
     def save_result(self):
         directory_name = datetime.now().strftime('result/%Y-%m-%d-%H:%M:%S-result')
         os.mkdir(directory_name)
         with codecs.open(directory_name + '/index.html', 'w', encoding='utf8') as f:
             f.write(str(self.template))
-        # shutil.copyfile('page_templates/logo.png', directory_name + '/logo.png')
 
 
 def main():
     getter = GetMingle()
-    iterations = getter.get_iterations_map()
-    cards = getter.get_cards_list_by_iteration(list(iterations.keys())[:2])
-    changes = getter.get_changes_by_card_numbers(list(cards.keys()))
-    getter.format_card_status_durations(cards, changes)
+    current_iteration = getter.get_current_iteration()
+    cards = getter.get_cards_by_iteration(current_iteration)
+    getter.format_card_status_durations(cards)
     getter.save_result()
 
 
