@@ -1,4 +1,4 @@
-from datetime import datetime, time, timedelta, date
+from datetime import datetime, time, timedelta
 
 
 class Card:
@@ -7,16 +7,18 @@ class Card:
         self.title = title
         self.points = points
         self.changes = changes
+        self.key_status = key_status
         self.history = {}
         self.movement = []
         self.durations = {status: 0 for status in interested_status}
         self.moved_back = False
         self.description_changed = False
 
+    def init(self):
         self.get_history_from_changes()
         self.get_durations_from_history()
         self.get_movement_from_history()
-        self.get_extra_info_from_history(key_status)
+        self.get_extra_info_from_history()
 
     def get_history_from_changes(self):
         for entry in self.changes:
@@ -29,15 +31,15 @@ class Card:
             if change != 'description-change':
                 self.movement.append(change)
 
-    def get_extra_info_from_history(self, key_status):
+    def get_extra_info_from_history(self):
         get_to_the_key_status = False
         for change in self.history.values():
             if get_to_the_key_status:
                 if change == 'description-change':
                     self.description_changed = True
-                elif change == key_status:
+                elif change == self.key_status:
                     self.moved_back = True
-            if change == key_status:
+            if change == self.key_status:
                 get_to_the_key_status = True
 
     def get_durations_from_history(self):
