@@ -44,7 +44,7 @@ class Card:
         last_time = None
         for this_time in self.history:
             this_status = self.history[this_time]
-            if this_status in self.interested_status:
+            if this_status in self.durations:
                 this_time = datetime.fromtimestamp(this_time)
                 time_delta = calculate_days_from_time(last_time, this_time)
                 self.durations[this_status] += time_delta
