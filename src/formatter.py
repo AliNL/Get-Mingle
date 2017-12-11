@@ -1,4 +1,3 @@
-import datetime
 from bs4 import BeautifulSoup
 
 
@@ -14,6 +13,23 @@ class Formatter:
                        'rgba(149,117,205,1)', 'rgba(100,181,246,1)', 'rgba(77,208,225,1)',
                        'rgba(129,199,132,1)', 'rgba(220,231,117,1)', 'rgba(255,213,79,1)',
                        'rgba(255,138,101,1)']
+
+    def format_iteration_chart(self, iteration):
+        pass
+
+    def format_iteration_data(self, iteration):
+        section = self.template.find('div', id='iteration-summary-section')
+        section.h2.string.insert_after(iteration.title)
+        data_part = self.template.find('div', class_='iteration-summary-data')
+
+        h3_tag = self.template.new_tag('h3')
+        h3_tag.string = 'Total Points: ' + str(iteration.sum_points)
+        data_part.append(h3_tag)
+
+        for status in iteration.sum_days:
+            h3_tag = self.template.new_tag('h3')
+            h3_tag.string = 'Total Days for "' + status + '": ' + str(iteration.sum_days[status])
+            data_part.append(h3_tag)
 
     def format_status_toggles(self):
         parent_tag = self.template.find('div', class_='status-toggles')
@@ -44,6 +60,7 @@ class Formatter:
         data_str = self._get_data_str_from_all_data()
         script_tag.insert_before('\nvar card_numbers = ' + labels + ';')
         script_tag.insert_before('\nvar all_data = ' + data_str + ';')
+        self.template.find('canvas', id='statusDurationsChart')['height'] = str(len(cards) * 15)
 
     def format_card_durations_data(self, cards):
         table_tag = self.template.find('table', id='statusDurationsData')

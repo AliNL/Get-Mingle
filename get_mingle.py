@@ -79,7 +79,9 @@ class GetMingle:
                             break
         return changes
 
-    def format_card_status_durations(self, cards):
+    def format_index(self, iteration, cards):
+        self.formatter.format_iteration_data(iteration)
+        self.formatter.format_iteration_chart(iteration)
         self.formatter.format_status_toggles()
         self.formatter.format_card_durations_chart(cards)
         self.formatter.format_card_durations_data(cards)
@@ -95,7 +97,8 @@ def main():
     getter = GetMingle()
     current_iteration = getter.get_current_iteration()
     cards = getter.get_cards_by_iteration(current_iteration)
-    getter.format_card_status_durations(cards)
+    current_iteration.get_cards_data(cards)
+    getter.format_index(current_iteration, cards)
     getter.save_result()
 
 

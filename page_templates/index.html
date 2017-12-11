@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Get Mingle</title>
-    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/AliNL/Get-Mingle/master/page_templates/logo.png" />
+    <link rel="icon" type="image/x-icon"
+          href="https://raw.githubusercontent.com/AliNL/Get-Mingle/master/page_templates/logo.png"/>
     <style>
         header div {
             display: flex;
@@ -42,6 +43,7 @@
 
         h3 {
             font-size: 20px;
+            margin: 10px;
         }
 
         body {
@@ -70,7 +72,8 @@
 
         div.iteration-summary-data {
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between;
+            flex-wrap: wrap;
         }
 
         div.part {
@@ -180,19 +183,10 @@
 <div class="section" id="iteration-summary-section">
     <div class="content">
         <div class="content-header">
-            <h2>Iteration Summary</h2>
+            <h2>Iteration </h2>
         </div>
         <hr/>
-        <div class="iteration-summary-data">
-            <div class="part">
-                <h2>Total Estimated Points: 8</h2>
-                <h2>Total Steps: 100</h2>
-            </div>
-            <div class="part" style="align-items: flex-end">
-                <h2>Total Days for "In-Progress": 18</h2>
-                <h2>Total Days for "In QA": 10</h2>
-            </div>
-        </div>
+        <div class="iteration-summary-data"></div>
         <div class="iteration-summary-chart">
             <canvas id="iterationSummaryChart"></canvas>
         </div>
