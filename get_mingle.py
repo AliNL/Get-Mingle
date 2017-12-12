@@ -29,10 +29,11 @@ class GetMingle:
         self.requester = Requester(self.host, self.project, user_name, secret_key)
         self.formatter = Formatter(self.template, self.status, url)
 
-    def get_current_iteration(self):
-        today = datetime.today()
-        this_monday = (today - timedelta(today.weekday())).strftime('%Y-%m-%d')
-        xml = self.requester.get_cards_by_mql(f"SELECT Number, Name where Name = '{this_monday}'")
+    def get_current_iteration(self, name=None):
+        if not name:
+            today = datetime.today()
+            name = (today - timedelta(today.weekday())).strftime('%Y-%m-%d')
+        xml = self.requester.get_cards_by_mql(f"SELECT Number, Name where Name = '{name}'")
         soup = BeautifulSoup(xml, 'xml')
         number = soup.find('number').string
         title = soup.find('name').string
