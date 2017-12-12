@@ -13,9 +13,18 @@ class Formatter:
                        'rgba(149,117,205,1)', 'rgba(100,181,246,1)', 'rgba(77,208,225,1)',
                        'rgba(129,199,132,1)', 'rgba(220,231,117,1)', 'rgba(255,213,79,1)',
                        'rgba(255,138,101,1)']
+        self.script_tag = self.template.find('script', type='text/javascript').string
 
     def format_iteration_chart(self, iteration):
-        pass
+        data_str = '['
+        for step in iteration.steps:
+            data_str += "{"
+            data_str += f"x: '{step}',"
+            data_str += "y: " + str(iteration.steps[step])
+            data_str += "},"
+        data_str = data_str[:-1] + ']'
+        self.script_tag.insert_before('\nvar steps_data = ' + data_str + ';')
+        # pass
 
     def format_iteration_data(self, iteration):
         section = self.template.find('div', id='iteration-summary-section')
@@ -50,7 +59,6 @@ class Formatter:
             parent_tag.append(insert_tag)
 
     def format_card_durations_chart(self, cards):
-        script_tag = self.template.find_all('script')[-1].string
         all_status = self.status.values()
         self.all_data = {status: [] for status in all_status}
         labels = str(['#' + card.number for card in cards])
@@ -58,8 +66,8 @@ class Formatter:
             for status in self.all_data:
                 self.all_data[status].append(card.durations[status])
         data_str = self._get_data_str_from_all_data()
-        script_tag.insert_before('\nvar card_numbers = ' + labels + ';')
-        script_tag.insert_before('\nvar all_data = ' + data_str + ';')
+        self.script_tag.insert_before('\nvar card_numbers = ' + labels + ';')
+        self.script_tag.insert_before('\nvar cards_data = ' + data_str + ';')
         self.template.find('canvas', id='statusDurationsChart')['height'] = str(len(cards) * 15)
 
     def format_card_durations_data(self, cards):

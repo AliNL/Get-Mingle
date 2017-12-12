@@ -71,17 +71,17 @@ def calculate_days_from_time(last_time, this_time):
     timed_delta += get_work_time(last_time, True)
     timed_delta += get_work_time(this_time, False)
 
-    time_pointer = last_time.date()
+    time_pointer = last_time.date() + timedelta(1)
     while time_pointer < this_time.date():
-        time_pointer += timedelta(1)
         if time_pointer.weekday() < 5:
             timed_delta += timedelta(0, 32400)
+        time_pointer += timedelta(1)
     return round(timed_delta.total_seconds() / (3600 * 9), 2)
 
 
 def get_work_time(this_time, is_start):
     if this_time.weekday() > 4:
-        return 0
+        return timedelta(0)
     day_start = datetime.combine(this_time.date(), time(9, 0))
     day_end = datetime.combine(this_time.date(), time(18, 0))
 

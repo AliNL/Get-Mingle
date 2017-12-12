@@ -76,8 +76,8 @@
             flex-wrap: wrap;
         }
 
-        div.part {
-            display: inline-block;
+        div.iteration-summary-chart {
+            margin: 10px;
         }
 
         div.switch-box button.switch-box-btn {
@@ -164,6 +164,7 @@
         }
 
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.4/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
     <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
 </head>
@@ -187,6 +188,9 @@
         </div>
         <hr/>
         <div class="iteration-summary-data"></div>
+        <div class="iteration-summary-chart">
+            <canvas height="80" id="iterationSummaryChart"></canvas>
+        </div>
     </div>
 </div>
 <div class="section" id="card-durations-section">
@@ -224,11 +228,47 @@
                 $('th:nth-child(' + (statusId + 2) + '),td:nth-child(' + (statusId + 2) + ')').toggle(200);
             }
         );
+        var iterationSummaryChart = new Chart($('canvas#iterationSummaryChart'),{
+            type: 'line',
+            data: {
+                datasets: [{
+                    label: "Steps",
+                    backgroundColor : "rgba(79,195,247,0.3)",
+                    borderColor : "rgba(79,195,247,1)",
+                    data: steps_data
+                }]
+            },
+            options: {
+                legend: false,
+                scales: {
+                    xAxes: [{
+                        type: "time",
+                        ticks: {
+                            fontFamily: "Open Sans",
+                            fontColor: "black",
+                            fontSize: 12
+                        }
+                    }],
+                    yAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Movements'
+                        },
+                        ticks: {
+                            fontFamily: "Open Sans",
+                            fontColor: "black",
+                            fontSize: 12
+                        }
+                    }]
+                }
+            }
+        });
+
         var statusDurationsChart = new Chart($('canvas#statusDurationsChart'), {
             type: 'horizontalBar',
             data: {
                 labels: card_numbers,
-                datasets: all_data
+                datasets: cards_data
             },
             options: {
                 legend: false,
