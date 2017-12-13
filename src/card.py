@@ -10,7 +10,7 @@ class Card:
         self.key_status = key_status
         self.history = {}
         self.movement = []
-        self.durations = {status: 0 for status in interested_status.values()}
+        self.durations = {status: 0 for status in interested_status}
         self.moved_back = False
         self.description_changed = False
 

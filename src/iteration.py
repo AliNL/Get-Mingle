@@ -10,7 +10,7 @@ class Iteration:
         self.end_date = end_date
         self.sum_points = 0
         self.sum_steps = 0
-        self.steps_status = dict(zip(steps_status.values(), steps_status.keys()))
+        self.steps_status = steps_status
         self.sum_days = {key_status: 0 for key_status in key_status_list}
         self.cards = []
         self.changes = []
@@ -31,7 +31,7 @@ class Iteration:
                 old_status = found_status.find_next('old_value').string
                 new_status = found_status.find_next('new_value').string
                 if old_status in self.steps_status and new_status in self.steps_status:
-                    self.sum_steps += self.steps_status[new_status] - self.steps_status[old_status]
+                    self.sum_steps += self.steps_status.index(new_status) - self.steps_status.index(old_status)
                     self.steps[update_time] = self.sum_steps
 
     def init(self):

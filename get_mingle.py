@@ -2,7 +2,7 @@ import codecs
 from datetime import datetime, timedelta, date
 
 import os
-import yaml
+import json
 from bs4 import BeautifulSoup
 
 from src.card import Card
@@ -13,8 +13,8 @@ from src.requester import Requester
 
 class GetMingle:
     def __init__(self):
-        with open('config.yml', 'r') as f:
-            config = yaml.load(f)
+        with open('config.json', 'r') as f:
+            config = json.load(f)
         with open('page_templates/index.html', 'r') as f:
             template = BeautifulSoup(f.read(), 'html.parser')
 
@@ -37,10 +37,10 @@ class GetMingle:
     def get_iteration(self, name, start_date, end_date):
         start_date = datetime.strptime(start_date, '%Y-%m-%d')
         end_date = datetime.strptime(end_date, '%Y-%m-%d')
-        return Iteration(name, start_date, end_date, list(self.calculate_days_for.values()), self.calculate_steps_for)
+        return Iteration(name, start_date, end_date, self.calculate_days_for, self.calculate_steps_for)
 
     def get_cards_by_iteration(self, iteration: Iteration):
-        query_status = '(' + str(list(self.query_cards_in.values()))[1:-1] + ')'
+        query_status = '(' + str(self.query_cards_in)[1:-1] + ')'
         xml = self.requester.get_cards_by_mql(
             "SELECT Number,Name,'Estimated Points' " \
             + "where Status in " + query_status + " and Iteration = '" + iteration.title + "'")
