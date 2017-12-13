@@ -1,8 +1,8 @@
 # Get-Mingle
 
 ## How to use
-1. Create a yaml file called `config.yml`
-1. Copy the content in `config_template.yml` to `config.yml`
+1. Create a json file called `config.json`
+1. Copy the content in `config_template.json` to `config.json`
 1. Change it to your project info
 1. You can get your secret key from Mingle at: Settings -> HMAC Auth Key -> GENERATE
 1. The status doesn't need to be all of the status of your project, but the name should be exactly same with the status on Mingle
