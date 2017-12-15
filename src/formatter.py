@@ -2,9 +2,10 @@ from bs4 import BeautifulSoup
 
 
 class Formatter:
-    def __init__(self, template: BeautifulSoup, status, url):
+    def __init__(self, template: BeautifulSoup, status, key_status, url):
         self.template = template
         self.status = status
+        self.key_status = key_status
         self.url = url
         self.all_data = {}
         self.colors = ['rgba(229,115,115,1)', 'rgba(186,104,200,1)', 'rgba(121,134,203,1)',
@@ -43,6 +44,28 @@ class Formatter:
             h3_tag = self.template.new_tag('h3')
             h3_tag.string = 'Total Days for "' + status + '": ' + '%.2f' % iteration.sum_days[status]
             data_part.append(h3_tag)
+
+    def format_unusual_cards(self, cards):
+        section = self.template.find('div', class_='unusual-cards-section')
+        moved_back_section = section.find('div', class_='unusual-cards-sub-section left')
+        changed_section = section.find('div', class_='unusual-cards-sub-section right')
+        moved_back_section.h3['title'] = moved_back_section.h3.string + f' after moved to "{self.key_status}"'
+        changed_section.h3['title'] = changed_section.h3.string + f' after moved to "{self.key_status}"'
+        for card in cards:
+            if card.moved_back:
+                if moved_back_section.find('span'):
+                    moved_back_section.find('span').decompose()
+                a_tag = self.template.new_tag('a')
+                a_tag.string = '#' + card.number + ' ' + card.title
+                a_tag['href'] = self.url + card.number
+                moved_back_section.append(a_tag)
+            if card.description_changed:
+                if changed_section.find('span'):
+                    changed_section.find('span').decompose()
+                a_tag = self.template.new_tag('a')
+                a_tag.string = '#' + card.number + ' ' + card.title
+                a_tag['href'] = self.url + card.number
+                changed_section.append(a_tag)
 
     def format_status_toggles(self):
         parent_tag = self.template.find('div', class_='status-toggles')

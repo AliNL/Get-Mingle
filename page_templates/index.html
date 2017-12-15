@@ -7,6 +7,7 @@
           href="https://raw.githubusercontent.com/AliNL/Get-Mingle/master/page_templates/logo.png"/>
     <style>
         header div {
+            min-width: 750px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -51,9 +52,12 @@
             background-color: rgba(236, 236, 236, 1);
         }
 
-        div.section {
+        div.white-bg {
             background-color: white;
-            margin-bottom: 30px;
+        }
+
+        div.section {
+            padding: 10px 0 30px 0;
         }
 
         div.content {
@@ -61,7 +65,6 @@
             max-width: 1024px;
             margin: 0 auto;
             padding: 20px 50px;
-            background-color: white;
         }
 
         div.content-header {
@@ -163,6 +166,32 @@
             text-decoration: underline;
         }
 
+        div.unusual-cards-section {
+            display: flex;
+        }
+
+        div.unusual-cards-sub-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+        }
+
+        div.unusual-cards-sub-section.left {
+            margin-right: 10px;
+            background-color: rgba(220, 231, 117, 0.7);
+        }
+
+        div.unusual-cards-sub-section.right {
+            margin-left: 10px;
+            background-color: rgba(255, 213, 79, 0.7);
+        }
+
+        div.unusual-cards-sub-section a, div.unusual-cards-sub-section span {
+            margin: 5px 10px;
+        }
+
+
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.4/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
@@ -181,20 +210,42 @@
         </a>
     </div>
 </header>
-<div class="section" id="iteration-summary-section">
-    <div class="content">
+<div class="section white-bg" id="iteration-summary-section">
+    <div class="content white-bg">
         <div class="content-header">
             <h2>Iteration </h2>
         </div>
         <hr/>
         <div class="iteration-summary-data"></div>
+        <div style="margin: 10px 10px 30px 10px">
+            <span style="color: #aaaaaa">One movement means one card moved to next status. Movement can be negative if card moved back.</span>
+        </div>
         <div class="iteration-summary-chart">
             <canvas height="80" id="iterationSummaryChart"></canvas>
         </div>
     </div>
 </div>
-<div class="section" id="card-durations-section">
+
+<div class="section" id="whats-wrong-section">
     <div class="content">
+        <div class="content-header">
+            <h2>What's Wrong</h2>
+        </div>
+        <div class="unusual-cards-section">
+            <div class="unusual-cards-sub-section left">
+                <h3>Cards moved back</h3>
+                <span>No card!</span>
+            </div>
+            <div class="unusual-cards-sub-section right">
+                <h3>Cards changed description</h3>
+                <span>No card!</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section white-bg" id="card-durations-section">
+    <div class="content white-bg">
         <div class="content-header">
             <h2>Card Durations</h2>
             <div class="switch-box" style="font-size: 0;">
@@ -228,13 +279,13 @@
                 $('th:nth-child(' + (statusId + 2) + '),td:nth-child(' + (statusId + 2) + ')').toggle(200);
             }
         );
-        var iterationSummaryChart = new Chart($('canvas#iterationSummaryChart'),{
+        var iterationSummaryChart = new Chart($('canvas#iterationSummaryChart'), {
             type: 'line',
             data: {
                 datasets: [{
-                    label: "Steps",
-                    backgroundColor : "rgba(79,195,247,0.3)",
-                    borderColor : "rgba(79,195,247,1)",
+                    label: "Movements",
+                    backgroundColor: "rgba(79,195,247,0.3)",
+                    borderColor: "rgba(79,195,247,1)",
                     data: steps_data
                 }]
             },

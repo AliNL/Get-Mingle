@@ -32,7 +32,7 @@ class GetMingle:
         self.time_zone = config['query_info']['time_zone']
 
         self.requester = Requester(self.host, self.project, user_name, secret_key)
-        self.formatter = Formatter(self.template, self.status, url)
+        self.formatter = Formatter(self.template, self.status, self.key_status, url)
 
     def get_iteration(self, name, start_date, end_date):
         start_date = datetime.strptime(start_date, '%Y-%m-%d')
@@ -104,6 +104,7 @@ class GetMingle:
     def format_index(self, iteration, cards):
         self.formatter.format_iteration_data(iteration)
         self.formatter.format_iteration_chart(iteration)
+        self.formatter.format_unusual_cards(cards)
         self.formatter.format_status_toggles()
         self.formatter.format_card_durations_chart(cards)
         self.formatter.format_card_durations_data(cards)
@@ -117,6 +118,7 @@ class GetMingle:
 
 def main():
     getter = GetMingle()
+    # iteration = getter.get_iteration(name='2017-12-11', start_date='2017-12-12', end_date='2017-12-19')
     iteration = getter.get_iteration(name='2017-12-04', start_date='2017-12-05', end_date='2017-12-12')
     cards = getter.get_cards_by_iteration(iteration)
     getter.get_info_of_iteration_and_cards(iteration, cards)
