@@ -1,10 +1,8 @@
 import codecs
-from datetime import datetime, timedelta, date
+import json
+from datetime import datetime, timedelta
 
 import os
-import json
-
-import sys
 from bs4 import BeautifulSoup
 
 from src.card import Card
@@ -45,7 +43,7 @@ class GetMingle:
     def get_cards_by_iteration(self, iteration: Iteration):
         query_status = '(' + str(self.query_cards_in)[1:-1] + ')'
         xml = self.requester.get_cards_by_mql(
-            "SELECT Number,Name,'Estimated Points','Created On' " \
+            "SELECT Number,Name,'Estimated Points','Created On' "
             + "where Status in " + query_status + " and Iteration = '" + iteration.title + "'")
         soup = BeautifulSoup(xml, 'xml')
         cards = []
@@ -75,7 +73,8 @@ class GetMingle:
 
                 update_time = datetime.strptime(entry.updated.string, '%Y-%m-%dT%H:%M:%SZ') + timedelta(
                     hours=int(self.time_zone))
-                progress = '\rCalling the api %.2f%% ' % ((start_time - update_time) / (start_time - self.oldest_date) * 100)
+                progress = '\rCalling the api %.2f%% ' % (
+                    (start_time - update_time) / (start_time - self.oldest_date) * 100)
                 print(progress, end='')
                 entry.updated.string = update_time.strftime('%Y-%m-%dT%H:%M:%SZ')
                 if not_finished_iteration:
