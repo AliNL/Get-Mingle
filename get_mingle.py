@@ -75,8 +75,8 @@ class GetMingle:
 
                 update_time = datetime.strptime(entry.updated.string, '%Y-%m-%dT%H:%M:%SZ') + timedelta(
                     hours=int(self.time_zone))
-                str = '\rCalling the api %.2f%% ' % ((start_time - update_time) / (start_time - self.oldest_date) * 100)
-                print(str, end='')
+                progress = '\rCalling the api %.2f%% ' % ((start_time - update_time) / (start_time - self.oldest_date) * 100)
+                print(progress, end='')
                 entry.updated.string = update_time.strftime('%Y-%m-%dT%H:%M:%SZ')
                 if not_finished_iteration:
                     not_finished_iteration = self.modify_iteration_from_entry(entry, update_time, iteration)
