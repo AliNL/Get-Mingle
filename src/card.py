@@ -10,6 +10,7 @@ class Card:
         self.key_status = key_status
         self.history = {}
         self.movement = []
+        self.interested_status = interested_status
         self.durations = {status: 0 for status in interested_status}
         self.moved_back = False
         self.description_changed = False
@@ -27,9 +28,14 @@ class Card:
                 self.history[this_time] = this_change
 
     def get_movement_from_history(self):
+        last_index = 0
         for change in self.history.values():
-            if change != 'description-change':
+            if change in self.interested_status:
                 self.movement.append(change)
+                if self.interested_status.index(change) > last_index:
+                    last_index = self.interested_status.index(change)
+                else:
+                    self.moved_back = True
 
     def get_extra_info_from_history(self):
         get_to_the_key_status = False
@@ -37,8 +43,7 @@ class Card:
             if get_to_the_key_status:
                 if change == 'description-change':
                     self.description_changed = True
-                elif change == self.key_status:
-                    self.moved_back = True
+                    return
             if change == self.key_status:
                 get_to_the_key_status = True
 

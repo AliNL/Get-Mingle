@@ -3,6 +3,8 @@ from datetime import datetime, timedelta, date
 
 import os
 import json
+
+import sys
 from bs4 import BeautifulSoup
 
 from src.card import Card
@@ -30,6 +32,7 @@ class GetMingle:
         self.calculate_days_for = config['query_info']['calculate_days_for']
         self.calculate_steps_for = config['query_info']['calculate_steps_for']
         self.time_zone = config['query_info']['time_zone']
+        self.oldest_date = datetime.now()
 
         self.requester = Requester(self.host, self.project, user_name, secret_key)
         self.formatter = Formatter(self.template, self.status, self.key_status, url)
@@ -42,7 +45,7 @@ class GetMingle:
     def get_cards_by_iteration(self, iteration: Iteration):
         query_status = '(' + str(self.query_cards_in)[1:-1] + ')'
         xml = self.requester.get_cards_by_mql(
-            "SELECT Number,Name,'Estimated Points' " \
+            "SELECT Number,Name,'Estimated Points','Created On' " \
             + "where Status in " + query_status + " and Iteration = '" + iteration.title + "'")
         soup = BeautifulSoup(xml, 'xml')
         cards = []
@@ -50,6 +53,8 @@ class GetMingle:
             number = result.find('number').string
             title = result.find('name').string
             points = result.find('estimated_points').string
+            this_date = datetime.strptime(result.find('created_on').string, '%Y-%m-%d')
+            self.oldest_date = this_date if this_date < self.oldest_date else self.oldest_date
             cards.append(Card(number, title, points, self.status, self.key_status))
         return cards
 
@@ -57,6 +62,7 @@ class GetMingle:
         not_finished_cards = {card.number: card for card in cards}
         not_finished_iteration = True
         next_page = None
+        start_time = datetime.now()
         while not_finished_cards or not_finished_iteration:
             xml = self.requester.get_events(next_page)
             soup = BeautifulSoup(xml, 'xml')
@@ -69,13 +75,14 @@ class GetMingle:
 
                 update_time = datetime.strptime(entry.updated.string, '%Y-%m-%dT%H:%M:%SZ') + timedelta(
                     hours=int(self.time_zone))
+                str = '\rCalling the api %.2f%% ' % ((start_time - update_time) / (start_time - self.oldest_date) * 100)
+                print(str, end='')
                 entry.updated.string = update_time.strftime('%Y-%m-%dT%H:%M:%SZ')
                 if not_finished_iteration:
                     not_finished_iteration = self.modify_iteration_from_entry(entry, update_time, iteration)
 
                 if not_finished_cards:
                     self.modify_cards_from_entry(entry, not_finished_cards)
-
         iteration.cards = cards
         iteration.init()
 
