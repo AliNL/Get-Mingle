@@ -28,22 +28,21 @@ class Card:
                 self.history[this_time] = this_change
 
     def get_movement_from_history(self):
-        last_index = 0
+        farther_status = 0
         for change in self.history.values():
             if change in self.interested_status:
-                self.movement.append(change)
-                if self.interested_status.index(change) > last_index:
-                    last_index = self.interested_status.index(change)
-                else:
+                this_status = self.interested_status.index(change)
+                if this_status >= farther_status:
+                    farther_status = this_status
+                elif change == self.key_status:
                     self.moved_back = True
+                self.movement.append(change)
 
     def get_extra_info_from_history(self):
         get_to_the_key_status = False
         for change in self.history.values():
-            if get_to_the_key_status:
-                if change == 'description-change':
-                    self.description_changed = True
-                    return
+            if get_to_the_key_status and change == 'description-change':
+                self.description_changed = True
             if change == self.key_status:
                 get_to_the_key_status = True
 

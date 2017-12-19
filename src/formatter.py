@@ -137,7 +137,7 @@ class Formatter:
         for status in card.durations:
             td_tag = self.template.new_tag('td')
             td_tag['style'] = f"background-color: {self.colors[i].replace('1)', '0.3)')};"
-            td_tag.string = str(card.durations[status])
+            td_tag.string = '%.2f' % card.durations[status]
             tr_tag.append(td_tag)
             i += 1
         return tr_tag
