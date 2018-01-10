@@ -1,3 +1,4 @@
+import operator
 from datetime import datetime, time, timedelta
 
 
@@ -70,6 +71,9 @@ def get_change_from_entry(entry):
     return None, None
 
 
+holidays = [datetime(2018, 1, 1).date()]
+
+
 def calculate_days_from_time(last_time, this_time):
     timed_delta = timedelta(0)
     timed_delta += get_work_time(last_time, True)
@@ -77,14 +81,14 @@ def calculate_days_from_time(last_time, this_time):
 
     time_pointer = last_time.date() + timedelta(1)
     while time_pointer < this_time.date():
-        if time_pointer.weekday() < 5:
+        if operator.xor(time_pointer.weekday() < 5, time_pointer in holidays):
             timed_delta += timedelta(0, 32400)
         time_pointer += timedelta(1)
     return round(timed_delta.total_seconds() / (3600 * 9), 2)
 
 
 def get_work_time(this_time, is_start):
-    if this_time.weekday() > 4:
+    if not operator.xor(this_time.weekday() < 5, this_time.date() in holidays):
         return timedelta(0)
     day_start = datetime.combine(this_time.date(), time(9, 0))
     day_end = datetime.combine(this_time.date(), time(18, 0))
