@@ -25,25 +25,17 @@ class Formatter:
             data_str += "},"
         data_str = data_str[:-1] + ']'
         self.script_tag.insert_before('\nvar steps_data = ' + data_str + ';')
-        # pass
 
     def format_iteration_data(self, iteration):
         section = self.template.find('div', id='iteration-summary-section')
         section.h2.string.insert_after(iteration.title)
         data_part = self.template.find('div', class_='iteration-summary-data')
 
-        h3_tag = self.template.new_tag('h3')
-        h3_tag.string = 'Total Points: ' + str(iteration.sum_points)
-        data_part.append(h3_tag)
-
-        h3_tag = self.template.new_tag('h3')
-        h3_tag.string = 'Total Movements: ' + str(iteration.sum_steps)
-        data_part.append(h3_tag)
-
+        data_part.append(self._new_tag('h3', 'Total Points: ' + str(iteration.sum_points)))
+        data_part.append(self._new_tag('h3', 'Total Movements: ' + str(iteration.sum_steps)))
         for status in iteration.sum_days:
-            h3_tag = self.template.new_tag('h3')
-            h3_tag.string = 'Total Days for "' + status + '": ' + '%.2f' % iteration.sum_days[status]
-            data_part.append(h3_tag)
+            data_part.append(
+                self._new_tag('h3', 'Total Days for "' + status + '": ' + '%.2f' % iteration.sum_days[status]))
 
     def format_unusual_cards(self, cards):
         section = self.template.find('div', class_='unusual-cards-section')
@@ -55,34 +47,24 @@ class Formatter:
             if card.moved_back:
                 if moved_back_section.find('span'):
                     moved_back_section.find('span').decompose()
-                a_tag = self.template.new_tag('a')
-                a_tag.string = '#' + card.number + ' ' + card.title
-                a_tag['href'] = self.url + card.number
-                moved_back_section.append(a_tag)
+                moved_back_section.append(
+                    self._new_tag('a', '#' + card.number + ' ' + card.title, {'href': self.url + card.number}))
             if card.description_changed:
                 if changed_section.find('span'):
                     changed_section.find('span').decompose()
-                a_tag = self.template.new_tag('a')
-                a_tag.string = '#' + card.number + ' ' + card.title
-                a_tag['href'] = self.url + card.number
-                changed_section.append(a_tag)
+                changed_section.append(self._new_tag('a', self.url + card.number, {'href': self.url + card.number}))
 
     def format_status_toggles(self):
         parent_tag = self.template.find('div', class_='status-toggles')
         for i in range(len(self.status)):
-            insert_tag = self.template.new_tag('div')
-            insert_tag['class'] = 'status-toggle'
-            insert_tag['name'] = str(i)
-            check_box = self.template.new_tag('span')
-            check_box['class'] = 'color-check-box'
-            color = self.colors[i]
-            check_box['style'] = f'background-color: {color};border: solid {color} 3px;'
-            status_name = self.template.new_tag('span')
-            status_name['class'] = 'status-name'
-            status_name.string = self.status[i]
+            insert_tag = self._new_tag('div', parameters={'class': 'status-toggle', 'name': str(i)})
 
-            insert_tag.append(check_box)
-            insert_tag.append(status_name)
+            color = self.colors[i]
+            insert_tag.append(self._new_tag(
+                'span', parameters={'class': 'color-check-box',
+                                    'style': f'background-color: {color};border: solid {color} 3px;'}))
+            insert_tag.append(self._new_tag('span', self.status[i], {'class': 'status-name'}))
+
             parent_tag.append(insert_tag)
 
     def format_card_durations_chart(self, cards):
@@ -98,46 +80,43 @@ class Formatter:
 
     def format_card_durations_data(self, cards):
         table_tag = self.template.find('table', id='statusDurationsData')
-        table_tag.append(self._get_tr_th_from_data('Card', self.status))
+        table_tag.append(self._get_tr_th_from_data('Card', 'Sum', self.status))
         average_data = ['%.2f' % (sum([float(data) for data in self.all_data[status]]) / len(cards)) for status in
                         self.status]
-        table_tag.append(self._get_tr_th_from_data('Average', average_data))
+        table_tag.append(self._get_tr_th_from_data('Average', '0', average_data))
 
         for card in cards:
             table_tag.append(self._get_tr_td_from_card(card))
 
-    def _get_tr_th_from_data(self, title, data):
-        tr_tag = self.template.new_tag('tr')
-        th_tag = self.template.new_tag('th')
-        th_tag['style'] = 'background-color: rgba(109,196,203,1);'
-        th_tag.string = title
-        tr_tag.append(th_tag)
+    def _get_tr_th_from_data(self, title, summary, data):
+        tr_tag = self._new_tag('tr')
+
+        tr_tag.append(self._new_tag('th', title, {'style': 'background-color: rgba(109,196,203,1);'}))
+        tr_tag.append(self._new_tag('th', summary, {'style': 'background-color: rgba(15,180,216,1);'}))
 
         for i in range(len(data)):
-            td_tag = self.template.new_tag('th')
-            td_tag['style'] = f"background-color: {self.colors[i]};"
-            td_tag.string = str(data[i])
-            tr_tag.append(td_tag)
+            tr_tag.append(self._new_tag('th', str(data[i]), {'style': f"background-color: {self.colors[i]};"}))
             i += 1
         return tr_tag
 
     def _get_tr_td_from_card(self, card):
-        tr_tag = self.template.new_tag('tr')
-        card_td_tag = self.template.new_tag('td')
-        card_td_tag['style'] = 'background-color: rgba(109,196,203,0.3);'
-        card_a_tag = self.template.new_tag('a')
-        card_a_tag.string = '#' + card.number
-        card_a_tag['title'] = card.title
-        card_a_tag['href'] = self.url + card.number
+        tr_tag = self._new_tag('tr')
 
+        card_td_tag = self._new_tag('td', parameters={'style': 'background-color: rgba(109,196,203,0.3);'})
+        card_a_tag = self._new_tag('a', '#' + card.number, {'title': card.title, 'href': self.url + card.number})
         card_td_tag.append(card_a_tag)
+
+        points_td_tag = self._new_tag('td', card.points, {'style': 'background-color: rgba(15,180,216,0.3);'})
+        sum_td_tag = self._new_tag('td', '0', {'style': 'background-color: rgba(15,180,216,0.3);'})
+
         tr_tag.append(card_td_tag)
+        tr_tag.append(points_td_tag)
+        tr_tag.append(sum_td_tag)
 
         i = 0
         for status in card.durations:
-            td_tag = self.template.new_tag('td')
-            td_tag['style'] = f"background-color: {self.colors[i].replace('1)', '0.3)')};"
-            td_tag.string = '%.2f' % card.durations[status]
+            td_tag = self._new_tag('td', '%.2f' % card.durations[status],
+                                   {'style': f"background-color: {self.colors[i].replace('1)', '0.3)')};"})
             tr_tag.append(td_tag)
             i += 1
         return tr_tag
@@ -154,3 +133,12 @@ class Formatter:
             i += 1
         data_str = data_str[:-1] + "]"
         return data_str
+
+    def _new_tag(self, tag_type, string='', parameters=None):
+        new_tag = self.template.new_tag(tag_type)
+        if string:
+            new_tag.string = string
+        if parameters:
+            for key in parameters:
+                new_tag[key] = parameters[key]
+        return new_tag
