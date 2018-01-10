@@ -52,7 +52,8 @@ class Formatter:
             if card.description_changed:
                 if changed_section.find('span'):
                     changed_section.find('span').decompose()
-                changed_section.append(self._new_tag('a', self.url + card.number, {'href': self.url + card.number}))
+                changed_section.append(
+                    self._new_tag('a', '#' + card.number + ' ' + card.title, {'href': self.url + card.number}))
 
     def format_status_toggles(self):
         parent_tag = self.template.find('div', class_='status-toggles')
