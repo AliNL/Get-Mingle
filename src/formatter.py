@@ -8,6 +8,7 @@ class Formatter:
         self.key_status = key_status
         self.url = url
         self.all_data = {}
+        self.average_data = []
         self.script_tag = self.template.find('script', type='text/javascript').string
 
     @staticmethod
@@ -88,9 +89,9 @@ class Formatter:
     def format_card_durations_data(self, cards):
         table_tag = self.template.find('table', id='statusDurationsData')
         table_tag.append(self._get_tr_th_from_data(['Card', 'Points', 'Total'], self.status))
-        average_data = ['%.2f' % (sum([float(data) for data in self.all_data[status]]) / len(cards)) for status in
-                        self.status]
-        table_tag.append(self._get_tr_th_from_data(['Average', '/', '0'], average_data))
+        self.average_data = ['%.2f' % (sum([float(data) for data in self.all_data[status]]) / len(cards)) for status in
+                             self.status]
+        table_tag.append(self._get_tr_th_from_data(['Average', '/', '0'], self.average_data))
 
         for card in cards:
             table_tag.append(self._get_tr_td_from_card(card))
@@ -123,8 +124,10 @@ class Formatter:
 
         i = 0
         for status in card.durations:
-            td_tag = self._new_tag('td', '%.2f' % card.durations[status],
-                                   {'style': f'background-color: {self.colors(i,0.3)};'})
+            dic = {'style': f'background-color: {self.colors(i,0.3)};'}
+            if card.durations[status] > float(self.average_data[i]) * 1.3:
+                dic['style'] += 'border: solid red 2px'
+            td_tag = self._new_tag('td', '%.2f' % card.durations[status], dic)
             tr_tag.append(td_tag)
             i += 1
         return tr_tag
