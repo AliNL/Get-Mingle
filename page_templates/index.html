@@ -264,6 +264,19 @@
     </div>
 </div>
 <script type="text/javascript">
+    function calculate_sum() {
+        $('tr').each(function (tr_idx) {
+            if (tr_idx > 0) {
+                var sum = 0;
+                $(this).find('td, th').each(function (td_idx) {
+                    if (td_idx > 2 && !$(this).hasClass('hide')) {
+                        sum += parseFloat($(this).text())
+                    }
+                });
+                $(this).find('td:nth-child(3),th:nth-child(3)').text(sum.toFixed(2));
+            }
+        });
+    }
     $(document).ready(function () {
         $('div.switch-box').click(function () {
             $('button.switch-box-btn').toggleClass('selected');
@@ -276,9 +289,13 @@
                 checkBox.toggleClass('removed');
                 statusDurationsChart.data.datasets[statusId].hidden = !!checkBox.hasClass('removed');
                 statusDurationsChart.update();
-                $('th:nth-child(' + (statusId + 2) + '),td:nth-child(' + (statusId + 2) + ')').toggle(200);
+                var cells = $('th:nth-child(' + (statusId + 4) + '),td:nth-child(' + (statusId + 4) + ')');
+                cells.toggleClass('hide');
+                cells.toggle(200);
+                calculate_sum();
             }
         );
+        calculate_sum();
         var iterationSummaryChart = new Chart($('canvas#iterationSummaryChart'), {
             type: 'line',
             data: {

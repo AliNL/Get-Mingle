@@ -8,13 +8,20 @@ class Formatter:
         self.key_status = key_status
         self.url = url
         self.all_data = {}
-        self.colors = ['rgba(229,115,115,1)', 'rgba(186,104,200,1)', 'rgba(121,134,203,1)',
-                       'rgba(79,195,247,1)', 'rgba(77,182,172,1)', 'rgba(174,213,129,1)',
-                       'rgba(255,241,118,1)', 'rgba(255,183,77,1)', 'rgba(240,98,146,1)',
-                       'rgba(149,117,205,1)', 'rgba(100,181,246,1)', 'rgba(77,208,225,1)',
-                       'rgba(129,199,132,1)', 'rgba(220,231,117,1)', 'rgba(255,213,79,1)',
-                       'rgba(255,138,101,1)']
         self.script_tag = self.template.find('script', type='text/javascript').string
+
+    @staticmethod
+    def colors(i, opacity=1):
+        col = [(229, 115, 115), (186, 104, 200), (121, 134, 203), (79, 195, 247),
+               (77, 182, 172), (174, 213, 129), (255, 241, 118), (255, 183, 77),
+               (240, 98, 146), (149, 117, 205), (100, 181, 246), (77, 208, 225),
+               (129, 199, 132), (220, 231, 117), (255, 213, 79), (255, 138, 101),
+               (244, 67, 54), (156, 39, 176), (63, 81, 181), (3, 169, 244),
+               (0, 150, 136), (139, 195, 74), (255, 235, 59), (255, 152, 0),
+               (233, 30, 99), (103, 58, 183), (33, 150, 243), (0, 188, 212),
+               (76, 175, 80), (205, 220, 57), (255, 193, 7), (255, 87, 34)]
+        r, g, b = col[i]
+        return 'rgba' + str((r, g, b, opacity))
 
     def format_iteration_chart(self, iteration):
         data_str = '['
@@ -58,12 +65,11 @@ class Formatter:
     def format_status_toggles(self):
         parent_tag = self.template.find('div', class_='status-toggles')
         for i in range(len(self.status)):
-            insert_tag = self._new_tag('div', parameters={'class': 'status-toggle', 'name': str(i)})
+            insert_tag = self._new_tag('div', dic={'class': 'status-toggle', 'name': str(i)})
 
-            color = self.colors[i]
             insert_tag.append(self._new_tag(
-                'span', parameters={'class': 'color-check-box',
-                                    'style': f'background-color: {color};border: solid {color} 3px;'}))
+                'span', dic={'class': 'color-check-box',
+                             'style': f'background-color: {self.colors(i)};border: solid {self.colors(i)} 3px;'}))
             insert_tag.append(self._new_tag('span', self.status[i], {'class': 'status-name'}))
 
             parent_tag.append(insert_tag)
@@ -81,34 +87,35 @@ class Formatter:
 
     def format_card_durations_data(self, cards):
         table_tag = self.template.find('table', id='statusDurationsData')
-        table_tag.append(self._get_tr_th_from_data('Card', 'Sum', self.status))
+        table_tag.append(self._get_tr_th_from_data(['Card', 'Points', 'Total'], self.status))
         average_data = ['%.2f' % (sum([float(data) for data in self.all_data[status]]) / len(cards)) for status in
                         self.status]
-        table_tag.append(self._get_tr_th_from_data('Average', '0', average_data))
+        table_tag.append(self._get_tr_th_from_data(['Average', '/', '0'], average_data))
 
         for card in cards:
             table_tag.append(self._get_tr_td_from_card(card))
 
-    def _get_tr_th_from_data(self, title, summary, data):
+    def _get_tr_th_from_data(self, titles, data):
         tr_tag = self._new_tag('tr')
 
-        tr_tag.append(self._new_tag('th', title, {'style': 'background-color: rgba(109,196,203,1);'}))
-        tr_tag.append(self._new_tag('th', summary, {'style': 'background-color: rgba(15,180,216,1);'}))
+        for i in range(len(titles)):
+            tr_tag.append(
+                self._new_tag('th', titles[i], {'style': f'background-color: {self.colors(i - len(titles))};'}))
 
         for i in range(len(data)):
-            tr_tag.append(self._new_tag('th', str(data[i]), {'style': f"background-color: {self.colors[i]};"}))
+            tr_tag.append(self._new_tag('th', str(data[i]), {'style': f"background-color: {self.colors(i)};"}))
             i += 1
         return tr_tag
 
     def _get_tr_td_from_card(self, card):
         tr_tag = self._new_tag('tr')
 
-        card_td_tag = self._new_tag('td', parameters={'style': 'background-color: rgba(109,196,203,0.3);'})
+        card_td_tag = self._new_tag('td', dic={'style': f'background-color: {self.colors(-3,0.3)};'})
         card_a_tag = self._new_tag('a', '#' + card.number, {'title': card.title, 'href': self.url + card.number})
         card_td_tag.append(card_a_tag)
 
-        points_td_tag = self._new_tag('td', card.points, {'style': 'background-color: rgba(15,180,216,0.3);'})
-        sum_td_tag = self._new_tag('td', '0', {'style': 'background-color: rgba(15,180,216,0.3);'})
+        points_td_tag = self._new_tag('td', card.points, {'style': f'background-color: {self.colors(-2,0.3)};'})
+        sum_td_tag = self._new_tag('td', '0', {'style': f'background-color: {self.colors(-1,0.3)};'})
 
         tr_tag.append(card_td_tag)
         tr_tag.append(points_td_tag)
@@ -117,7 +124,7 @@ class Formatter:
         i = 0
         for status in card.durations:
             td_tag = self._new_tag('td', '%.2f' % card.durations[status],
-                                   {'style': f"background-color: {self.colors[i].replace('1)', '0.3)')};"})
+                                   {'style': f'background-color: {self.colors(i,0.3)};'})
             tr_tag.append(td_tag)
             i += 1
         return tr_tag
@@ -129,17 +136,17 @@ class Formatter:
             data_str += "{"
             data_str += f"label: '{data}',"
             data_str += "data: " + str(self.all_data[data]) + ","
-            data_str += "backgroundColor: '" + self.colors[i] + "'"
+            data_str += "backgroundColor: '" + self.colors(i) + "'"
             data_str += "},"
             i += 1
         data_str = data_str[:-1] + "]"
         return data_str
 
-    def _new_tag(self, tag_type, string='', parameters=None):
+    def _new_tag(self, tag_type, string='', dic=None):
         new_tag = self.template.new_tag(tag_type)
         if string:
             new_tag.string = string
-        if parameters:
-            for key in parameters:
-                new_tag[key] = parameters[key]
+        if dic:
+            for key in dic:
+                new_tag[key] = dic[key]
         return new_tag

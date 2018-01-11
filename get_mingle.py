@@ -115,21 +115,25 @@ class GetMingle:
         self.formatter.format_card_durations_chart(cards)
         self.formatter.format_card_durations_data(cards)
 
-    def save_result(self):
+    def save_result(self, name=''):
         directory_name = datetime.now().strftime('result/%Y%m%d-%H%M%S')
         os.mkdir(directory_name)
-        with codecs.open(directory_name + '/index.html', 'w', encoding='utf8') as f:
+        with codecs.open(directory_name + '/Iteration ' + name + '.html', 'w', encoding='utf8') as f:
             f.write(str(self.template))
 
 
 def main():
     getter = GetMingle()
+    # iteration = getter.get_iteration(name='2018-01-08', start_date='2018-01-09', end_date='2018-01-16')
+    iteration = getter.get_iteration(name='2018-01-01', start_date='2018-01-02', end_date='2018-01-09')
+    # iteration = getter.get_iteration(name='2017-12-25', start_date='2017-12-26', end_date='2018-01-02')
+    # iteration = getter.get_iteration(name='2017-12-18', start_date='2017-12-19', end_date='2017-12-26')
     # iteration = getter.get_iteration(name='2017-12-11', start_date='2017-12-12', end_date='2017-12-19')
-    iteration = getter.get_iteration(name='2017-12-04', start_date='2017-12-05', end_date='2017-12-12')
+    # iteration = getter.get_iteration(name='2017-12-04', start_date='2017-12-05', end_date='2017-12-12')
     cards = getter.get_cards_by_iteration(iteration)
     getter.get_info_of_iteration_and_cards(iteration, cards)
     getter.format_index(iteration, cards)
-    getter.save_result()
+    getter.save_result(iteration.title)
 
 
 if __name__ == '__main__':
