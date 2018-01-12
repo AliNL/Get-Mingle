@@ -27,10 +27,7 @@ class Formatter:
     def format_iteration_chart(self, iteration):
         data_str = '['
         for step in iteration.steps:
-            data_str += "{"
-            data_str += f"x: '{step}',"
-            data_str += "y: " + str(iteration.steps[step])
-            data_str += "},"
+            data_str += f"{{x: '{step}', y: {str(iteration.steps[step])}}},"
         data_str = data_str[:-1] + ']'
         self.script_tag.insert_before('\nvar steps_data = ' + data_str + ';')
 
@@ -136,11 +133,7 @@ class Formatter:
         data_str = "["
         i = 0
         for data in self.all_data:
-            data_str += "{"
-            data_str += f"label: '{data}',"
-            data_str += "data: " + str(self.all_data[data]) + ","
-            data_str += "backgroundColor: '" + self.colors(i) + "'"
-            data_str += "},"
+            data_str += f"{{label: '{data}', data: {str(self.all_data[data])}, backgroundColor: '{self.colors(i)}'}},"
             i += 1
         data_str = data_str[:-1] + "]"
         return data_str
