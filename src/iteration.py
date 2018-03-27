@@ -31,7 +31,7 @@ class Iteration:
                 new_status = found_status.find_next('new_value').string
                 if old_status in self.steps_status and new_status in self.steps_status:
                     self.sum_steps += self.steps_status.index(new_status) - self.steps_status.index(old_status)
-                    if update_time in self.steps.keys():
+                    while update_time in self.steps.keys():
                         dt = datetime.strptime(update_time, '%Y-%m-%dT%H:%M:%S') + timedelta(seconds=1)
                         update_time = dt.strftime('%Y-%m-%dT%H:%M:%S')
                     self.steps[update_time] = self.sum_steps
