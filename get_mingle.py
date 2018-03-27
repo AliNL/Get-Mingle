@@ -136,7 +136,7 @@ class GetMingle:
     def save_result(self, name=''):
         directory_name = datetime.now().strftime('result/%Y%m%d-%H%M%S')
         os.mkdir(directory_name)
-        with codecs.open(directory_name + '/Iteration ' + name + '.html', 'w', encoding='utf8') as f:
+        with codecs.open(directory_name + '/' + name + '.html', 'w', encoding='utf8') as f:
             f.write(str(self.template))
 
 
@@ -146,7 +146,7 @@ def get_iteration_report():
     cards = getter.get_cards_by_iteration(iteration)
     getter.get_info_of_iteration_and_cards(iteration, cards)
     getter.format_index(iteration, cards)
-    getter.save_result(iteration.title)
+    getter.save_result('Iteration ' + iteration.title)
 
 
 def get_cards_report():
