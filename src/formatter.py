@@ -30,6 +30,7 @@ class Formatter:
             data_str += f"{{x: '{step}', y: {str(iteration.steps[step])}}},"
         data_str = data_str[:-1] + ']'
         self.script_tag.insert_before('\nvar steps_data = ' + data_str + ';')
+        self.script_tag.insert_before('\nvar movements = ' + str(iteration.movements) + ';')
 
     def format_iteration_data(self, iteration):
         section = self.template.find('div', id='iteration-summary-section')

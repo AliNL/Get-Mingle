@@ -159,3 +159,4 @@ def get_cards_report():
 
 if __name__ == '__main__':
     get_iteration_report()
+    # get_cards_report()
