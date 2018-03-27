@@ -56,9 +56,23 @@ class GetMingle:
             cards.append(Card(number, title, points, self.status, self.key_status))
         return cards
 
+    def get_cards_by_properties(self, properties):
+        mql = "SELECT Number,Name,'Estimated Points','Created On' where "
+        xml = self.requester.get_cards_by_mql(mql + " and ".join(properties))
+        soup = BeautifulSoup(xml, 'xml')
+        cards = []
+        for result in soup.find_all('result'):
+            number = result.find('number').string
+            title = result.find('name').string
+            points = result.find('estimated_points').string
+            this_date = datetime.strptime(result.find('created_on').string, '%Y-%m-%d')
+            self.oldest_date = this_date if this_date < self.oldest_date else self.oldest_date
+            cards.append(Card(number, title, points, self.status, self.key_status))
+        return cards
+
     def get_info_of_iteration_and_cards(self, iteration, cards):
         not_finished_cards = {card.number: card for card in cards}
-        not_finished_iteration = True
+        not_finished_iteration = not not iteration
         next_page = None
         start_time = datetime.now()
         while not_finished_cards or not_finished_iteration:
@@ -82,8 +96,9 @@ class GetMingle:
 
                 if not_finished_cards:
                     self.modify_cards_from_entry(entry, not_finished_cards)
-        iteration.cards = cards
-        iteration.init()
+        if iteration:
+            iteration.cards = cards
+            iteration.init()
 
     @staticmethod
     def modify_iteration_from_entry(entry, update_time, iteration):
@@ -108,8 +123,11 @@ class GetMingle:
                 not_finished_cards.pop(card_number)
 
     def format_index(self, iteration, cards):
-        self.formatter.format_iteration_data(iteration)
-        self.formatter.format_iteration_chart(iteration)
+        if iteration:
+            self.formatter.format_iteration_data(iteration)
+            self.formatter.format_iteration_chart(iteration)
+        else:
+            self.formatter.remove_iteration_summary_section()
         self.formatter.format_unusual_cards(cards)
         self.formatter.format_status_toggles()
         self.formatter.format_card_durations_chart(cards)
@@ -122,19 +140,22 @@ class GetMingle:
             f.write(str(self.template))
 
 
-def main():
+def get_iteration_report():
     getter = GetMingle()
-    # iteration = getter.get_iteration(name='2018-01-08', start_date='2018-01-09', end_date='2018-01-16')
-    iteration = getter.get_iteration(name='2018-01-01', start_date='2018-01-02', end_date='2018-01-09')
-    # iteration = getter.get_iteration(name='2017-12-25', start_date='2017-12-26', end_date='2018-01-02')
-    # iteration = getter.get_iteration(name='2017-12-18', start_date='2017-12-19', end_date='2017-12-26')
-    # iteration = getter.get_iteration(name='2017-12-11', start_date='2017-12-12', end_date='2017-12-19')
-    # iteration = getter.get_iteration(name='2017-12-04', start_date='2017-12-05', end_date='2017-12-12')
+    iteration = getter.get_iteration(name='2018-01-08', start_date='2018-01-09', end_date='2018-01-16')
     cards = getter.get_cards_by_iteration(iteration)
     getter.get_info_of_iteration_and_cards(iteration, cards)
     getter.format_index(iteration, cards)
     getter.save_result(iteration.title)
 
 
+def get_cards_report():
+    getter = GetMingle()
+    cards = getter.get_cards_by_properties(["'Scope - Epic' = NUMBER 3788"])
+    getter.get_info_of_iteration_and_cards(None, cards)
+    getter.format_index(None, cards)
+    getter.save_result('People-Talk-Cards')
+
+
 if __name__ == '__main__':
-    main()
+    get_iteration_report()

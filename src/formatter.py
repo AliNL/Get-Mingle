@@ -42,6 +42,9 @@ class Formatter:
             data_part.append(
                 self._new_tag('h3', 'Total Days for "' + status + '": ' + '%.2f' % iteration.sum_days[status]))
 
+    def remove_iteration_summary_section(self):
+        self.template.find('div', id='iteration-summary-section').decompose()
+
     def format_unusual_cards(self, cards):
         section = self.template.find('div', class_='unusual-cards-section')
         moved_back_section = section.find('div', class_='unusual-cards-sub-section left')
