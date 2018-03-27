@@ -339,6 +339,14 @@
                 datasets: cards_data
             },
             options: {
+                tooltips: {
+                    callbacks: {
+                        afterTitle: function(tooltipItems, data) {
+                            var tooltipItem = tooltipItems[0];
+                            return $('table#statusDurationsData a')[tooltipItem.index].title
+                        }
+                    }
+                },
                 legend: false,
                 scales: {
                     xAxes: [{
