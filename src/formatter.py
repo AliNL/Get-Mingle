@@ -89,7 +89,14 @@ class Formatter:
     def format_card_durations_data(self, cards):
         table_tag = self.template.find('table', id='statusDurationsData')
         table_tag.append(self._get_tr_th_from_data(['Card', 'Points', 'Total'], self.status))
-        self.average_data = ['%.2f' % (sum([float(data) for data in self.all_data[status]]) / len(cards)) for status in
+        total_points = 0
+        for card in cards:
+            if card.points:
+                total_points += int(card.points)
+            else:
+                total_points += 1
+        self.average_data = ['%.2f' % (sum([float(data) for data in self.all_data[status]]) / total_points) for status
+                             in
                              self.status]
         table_tag.append(self._get_tr_th_from_data(['Average', '/', '0'], self.average_data))
 
@@ -125,7 +132,10 @@ class Formatter:
         i = 0
         for status in card.durations:
             dic = {'style': f'background-color: {self.colors(i,0.3)};'}
-            if card.durations[status] > float(self.average_data[i]) * 1.3:
+            this_durations = card.durations[status]
+            if card.points:
+                this_durations = this_durations / int(card.points)
+            if this_durations > float(self.average_data[i]) * 1.3:
                 dic['style'] += 'border: solid red 2px'
             td_tag = self._new_tag('td', '%.2f' % card.durations[status], dic)
             tr_tag.append(td_tag)

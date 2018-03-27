@@ -142,7 +142,7 @@ class GetMingle:
 
 def get_iteration_report():
     getter = GetMingle()
-    iteration = getter.get_iteration(name='2018-01-08', start_date='2018-01-09', end_date='2018-01-16')
+    iteration = getter.get_iteration(name='2018-03-19', start_date='2018-03-20', end_date='2018-03-26')
     cards = getter.get_cards_by_iteration(iteration)
     getter.get_info_of_iteration_and_cards(iteration, cards)
     getter.format_index(iteration, cards)
