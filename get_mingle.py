@@ -38,8 +38,12 @@ class GetMingle:
     def get_iteration(self, name):
         mql = f"SELECT Number,Name,'Start date','End Date' where Name = '{name}'"
         xml = self.requester.get_cards_by_mql(mql)
+        if xml == b'Incorrect username or password.\n':
+            raise RuntimeError('Incorrect username or password.')
         soup = BeautifulSoup(xml, 'xml')
         result = soup.find('result')
+        if not result:
+            raise RuntimeError('No iteration found by this name.')
         start_date = datetime.strptime(result.find('start_date').string, '%Y-%m-%d')
         end_date = datetime.strptime(result.find('end_date').string, '%Y-%m-%d')
 
@@ -58,6 +62,8 @@ class GetMingle:
         return self.get_cards_from_xml(xml)
 
     def get_cards_from_xml(self, xml):
+        if xml == b'Incorrect username or password.\n':
+            raise RuntimeError('Incorrect username or password.')
         soup = BeautifulSoup(xml, 'xml')
         cards = []
         for result in soup.find_all('result'):
@@ -76,6 +82,8 @@ class GetMingle:
         start_time = datetime.now()
         while not_finished_cards or not_finished_iteration:
             xml = self.requester.get_events(next_page)
+            if xml == b'Incorrect username or password.\n':
+                raise RuntimeError('Incorrect username or password.')
             soup = BeautifulSoup(xml, 'xml')
             next_page = soup.find('link', rel='next')['href']
             entries = soup.find_all('entry')
