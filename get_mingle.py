@@ -35,9 +35,14 @@ class GetMingle:
         self.requester = Requester(self.host, self.project, user_name, secret_key)
         self.formatter = Formatter(self.template, self.status, self.key_status, url)
 
-    def get_iteration(self, name, start_date, end_date):
-        start_date = datetime.strptime(start_date, '%Y-%m-%d')
-        end_date = datetime.strptime(end_date, '%Y-%m-%d')
+    def get_iteration(self, name):
+        mql = f"SELECT Number,Name,'Start date','End Date' where Name = '{name}'"
+        xml = self.requester.get_cards_by_mql(mql)
+        soup = BeautifulSoup(xml, 'xml')
+        result = soup.find('result')
+        start_date = datetime.strptime(result.find('start_date').string, '%Y-%m-%d')
+        end_date = datetime.strptime(result.find('end_date').string, '%Y-%m-%d')
+
         return Iteration(name, start_date, end_date, self.calculate_days_for, self.calculate_steps_for)
 
     def get_cards_by_iteration(self, iteration: Iteration):
@@ -45,20 +50,14 @@ class GetMingle:
         xml = self.requester.get_cards_by_mql(
             "SELECT Number,Name,'Estimated Points','Created On' "
             + "where Status in " + query_status + " and Iteration = '" + iteration.title + "'")
-        soup = BeautifulSoup(xml, 'xml')
-        cards = []
-        for result in soup.find_all('result'):
-            number = result.find('number').string
-            title = result.find('name').string
-            points = result.find('estimated_points').string
-            this_date = datetime.strptime(result.find('created_on').string, '%Y-%m-%d')
-            self.oldest_date = this_date if this_date < self.oldest_date else self.oldest_date
-            cards.append(Card(number, title, points, self.status, self.key_status))
-        return cards
+        return self.get_cards_from_xml(xml)
 
     def get_cards_by_properties(self, properties):
         mql = "SELECT Number,Name,'Estimated Points','Created On' where "
         xml = self.requester.get_cards_by_mql(mql + " and ".join(properties))
+        return self.get_cards_from_xml(xml)
+
+    def get_cards_from_xml(self, xml):
         soup = BeautifulSoup(xml, 'xml')
         cards = []
         for result in soup.find_all('result'):
@@ -142,7 +141,7 @@ class GetMingle:
 
 def get_iteration_report():
     getter = GetMingle()
-    iteration = getter.get_iteration(name='2018-03-19', start_date='2018-03-20', end_date='2018-03-26')
+    iteration = getter.get_iteration('2018-06-18')
     cards = getter.get_cards_by_iteration(iteration)
     getter.get_info_of_iteration_and_cards(iteration, cards)
     getter.format_index(iteration, cards)
