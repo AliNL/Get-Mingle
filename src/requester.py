@@ -49,3 +49,9 @@ class Requester:
             auth=self.my_auth,
             data=json_body)
         return response.content
+
+    def get_murmurs(self, number):
+        response = requests.get(
+            url=self.my_host + '/api/v2/projects/' + self.my_project + '/cards/' + number + '/murmurs.xml',
+            auth=self.my_auth)
+        return response.content
