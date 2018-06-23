@@ -1,8 +1,8 @@
 import codecs
 import json
+import os
 from datetime import datetime, timedelta
 
-import os
 from bs4 import BeautifulSoup
 
 from src.card import Card
@@ -72,7 +72,7 @@ class GetMingle:
             points = result.find('estimated_points').string
             this_date = datetime.strptime(result.find('created_on').string, '%Y-%m-%d')
             self.oldest_date = this_date if this_date < self.oldest_date else self.oldest_date
-            cards.append(Card(number, title, points, self.status, self.key_status))
+            cards.append(Card(number, title, points, self.status, self.key_status, self.requester, self.time_zone))
         return cards
 
     def get_info_of_iteration_and_cards(self, iteration, cards):
@@ -95,7 +95,7 @@ class GetMingle:
                 update_time = datetime.strptime(entry.updated.string, '%Y-%m-%dT%H:%M:%SZ') + timedelta(
                     hours=int(self.time_zone))
                 progress = '\rCalling the api %.2f%% ' % (
-                    (start_time - update_time) / (start_time - self.oldest_date) * 100)
+                        (start_time - update_time) / (start_time - self.oldest_date) * 100)
                 print(progress, end='')
                 entry.updated.string = update_time.strftime('%Y-%m-%dT%H:%M:%SZ')
                 if not_finished_iteration:

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from bs4 import BeautifulSoup
 
 
@@ -54,15 +56,17 @@ class Formatter:
         changed_section.h3['title'] = changed_section.h3.string + f' after moved to "{self.key_status}"'
         for card in cards:
             if card.moved_back:
-                if moved_back_section.find('span'):
-                    moved_back_section.find('span').decompose()
+                if moved_back_section.find('span', class_='no-card'):
+                    moved_back_section.find('span', class_='no-card').decompose()
                 moved_back_section.append(
-                    self._new_tag('a', '#' + card.number + ' ' + card.title, {'href': self.url + card.number}))
+                    self._new_tag('button', '#' + card.number + ' ' + card.title, {'name': card.number}))
+                moved_back_section.append(
+                    self._new_popup(card.number, card.title, card.movements))
             if card.description_changed:
-                if changed_section.find('span'):
-                    changed_section.find('span').decompose()
+                if changed_section.find('span', class_='no-card'):
+                    changed_section.find('span', class_='no-card').decompose()
                 changed_section.append(
-                    self._new_tag('a', '#' + card.number + ' ' + card.title, {'href': self.url + card.number}))
+                    self._new_tag('button', '#' + card.number + ' ' + card.title, {'name': card.number}))
 
     def format_status_toggles(self):
         parent_tag = self.template.find('div', class_='status-toggles')
@@ -105,26 +109,31 @@ class Formatter:
             table_tag.append(self._get_tr_td_from_card(card))
 
     def _get_tr_th_from_data(self, titles, data):
-        tr_tag = self._new_tag('tr')
+        tr_tag = self._new_tag('tr', dic={'class': 'duration'})
 
         for i in range(len(titles)):
             tr_tag.append(
-                self._new_tag('th', titles[i], {'style': f'background-color: {self.colors(i - len(titles))};'}))
+                self._new_tag('th', titles[i],
+                              {'style': f'background-color: {self.colors(i - len(titles))};', 'class': 'duration'}))
 
         for i in range(len(data)):
-            tr_tag.append(self._new_tag('th', str(data[i]), {'style': f"background-color: {self.colors(i)};"}))
+            tr_tag.append(self._new_tag('th', str(data[i]),
+                                        {'style': f"background-color: {self.colors(i)};", 'class': 'duration'}))
             i += 1
         return tr_tag
 
     def _get_tr_td_from_card(self, card):
-        tr_tag = self._new_tag('tr')
+        tr_tag = self._new_tag('tr', dic={'class': 'duration'})
 
-        card_td_tag = self._new_tag('td', dic={'style': f'background-color: {self.colors(-3,0.3)};'})
+        card_td_tag = self._new_tag('td',
+                                    dic={'style': f'background-color: {self.colors(-3,0.3)};', 'class': 'duration'})
         card_a_tag = self._new_tag('a', '#' + card.number, {'title': card.title, 'href': self.url + card.number})
         card_td_tag.append(card_a_tag)
 
-        points_td_tag = self._new_tag('td', card.points, {'style': f'background-color: {self.colors(-2,0.3)};'})
-        sum_td_tag = self._new_tag('td', '0', {'style': f'background-color: {self.colors(-1,0.3)};'})
+        points_td_tag = self._new_tag('td', card.points,
+                                      {'style': f'background-color: {self.colors(-2,0.3)};', 'class': 'duration'})
+        sum_td_tag = self._new_tag('td', '0',
+                                   {'style': f'background-color: {self.colors(-1,0.3)};', 'class': 'duration'})
 
         tr_tag.append(card_td_tag)
         tr_tag.append(points_td_tag)
@@ -132,7 +141,7 @@ class Formatter:
 
         i = 0
         for status in card.durations:
-            dic = {'style': f'background-color: {self.colors(i,0.3)};'}
+            dic = {'style': f'background-color: {self.colors(i,0.3)};', 'class': 'duration'}
             this_durations = card.durations[status]
             if card.points:
                 this_durations = this_durations / int(card.points)
@@ -159,4 +168,36 @@ class Formatter:
         if dic:
             for key in dic:
                 new_tag[key] = dic[key]
+        return new_tag
+
+    def _new_popup(self, number, title, movements):
+        new_tag = self._new_tag('div', dic={'class': 'popup-cover', 'id': number})
+        popup = self._new_tag('div', dic={'class': 'popup'})
+        new_tag.append(popup)
+        header = self._new_tag('div', dic={'class': 'header-area'})
+        popup.append(header)
+        header.append(self._new_tag('span', '×', {'class': 'close', 'name': number}))
+        header.append(self._new_tag('span', '#' + number, {'class': 'number'}))
+        header.append(self._new_tag('span', title, {'class': 'title'}))
+        history_area = self._new_tag('div', dic={'class': 'history-area'})
+        popup.append(history_area)
+        table = self._new_tag('table')
+        history_area.append(table)
+
+        time_list = list(movements.keys())
+        time_list.sort()
+        for i in range(1, len(time_list)):
+            this_time = time_list[i]
+            tr_tag = self._new_tag('tr')
+            table.append(tr_tag)
+            if movements[this_time][0] in ('murmur', 'description'):
+                tr_tag.append(self._new_tag('td'))
+            td_tag = self._new_tag('td')
+            tr_tag.append(td_tag)
+            td_tag.append(self._new_tag('span', datetime.fromtimestamp(this_time).strftime('%Y-%m-%d %H:%M')))
+            h5 = self._new_tag('h5', dic={'class': movements[this_time][0]})
+            td_tag.append(h5)
+            for string in movements[this_time][1:]:
+                h5.append(self._new_tag('p', string))
+
         return new_tag
