@@ -112,6 +112,8 @@ def calculate_days_from_time(last_time, this_time):
         if operator.xor(time_pointer.weekday() < 5, time_pointer in holidays):
             timed_delta += timedelta(0, 32400)
         time_pointer += timedelta(1)
+    if last_time.date() == this_time.date():
+        timed_delta -= timedelta(0, 32400)
     return round(timed_delta.total_seconds() / (3600 * 9), 2)
 
 

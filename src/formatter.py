@@ -67,6 +67,8 @@ class Formatter:
                     changed_section.find('span', class_='no-card').decompose()
                 changed_section.append(
                     self._new_tag('button', '#' + card.number + ' ' + card.title, {'name': card.number}))
+                changed_section.append(
+                    self._new_popup(card.number, card.title, card.movements))
 
     def format_status_toggles(self):
         parent_tag = self.template.find('div', class_='status-toggles')
