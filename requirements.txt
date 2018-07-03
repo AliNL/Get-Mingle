@@ -1,3 +1,4 @@
+appJar
 requests
 bs4
 lxml

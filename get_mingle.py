@@ -1,8 +1,10 @@
 import codecs
 import json
 import os
+import threading
 from datetime import datetime, timedelta
 
+import appJar
 from bs4 import BeautifulSoup
 
 from src.card import Card
@@ -31,6 +33,7 @@ class GetMingle:
         self.calculate_steps_for = config['query_info']['calculate_steps_for']
         self.time_zone = config['query_info']['time_zone']
         self.oldest_date = datetime.now()
+        self.progress = 0
 
         self.requester = Requester(self.host, self.project, user_name, secret_key)
         self.formatter = Formatter(self.template, self.status, self.key_status, url)
@@ -50,6 +53,7 @@ class GetMingle:
         return Iteration(name, start_date, end_date, self.calculate_days_for, self.calculate_steps_for)
 
     def get_cards_by_iteration(self, iteration: Iteration):
+        self.progress = 1
         query_status = '(' + str(self.query_cards_in)[1:-1] + ')'
         xml = self.requester.get_cards_by_mql(
             "SELECT Number,Name,'Estimated Points','Created On' "
@@ -94,9 +98,9 @@ class GetMingle:
 
                 update_time = datetime.strptime(entry.updated.string, '%Y-%m-%dT%H:%M:%SZ') + timedelta(
                     hours=int(self.time_zone))
-                progress = '\rCalling the api %.2f%% ' % (
-                        (start_time - update_time) / (start_time - self.oldest_date) * 100)
-                print(progress, end='')
+                self.progress = (start_time - update_time) / (start_time - self.oldest_date) * 100
+                self.progress = self.progress if self.progress > 1 else 1
+                print('\rCalling the api %.2f%% ' % self.progress, end='')
                 entry.updated.string = update_time.strftime('%Y-%m-%dT%H:%M:%SZ')
                 if not_finished_iteration:
                     not_finished_iteration = self.modify_iteration_from_entry(entry, update_time, iteration)
@@ -141,29 +145,56 @@ class GetMingle:
         self.formatter.format_card_durations_data(cards)
 
     def save_result(self, name=''):
+        self.progress = 100
         directory_name = datetime.now().strftime('result/%Y%m%d-%H%M%S')
         os.mkdir(directory_name)
         with codecs.open(directory_name + '/' + name + '.html', 'w', encoding='utf8') as f:
             f.write(str(self.template))
 
 
-def get_iteration_report():
-    getter = GetMingle()
-    iteration = getter.get_iteration('2018-06-18')
+def get_iteration_report(getter, iteration_name):
+    iteration = getter.get_iteration(iteration_name)
     cards = getter.get_cards_by_iteration(iteration)
     getter.get_info_of_iteration_and_cards(iteration, cards)
     getter.format_index(iteration, cards)
     getter.save_result('Iteration ' + iteration.title)
 
-
-def get_cards_report():
-    getter = GetMingle()
-    cards = getter.get_cards_by_properties(["'Scope - Epic' = NUMBER 3788"])
-    getter.get_info_of_iteration_and_cards(None, cards)
-    getter.format_index(None, cards)
-    getter.save_result('People-Talk-Cards')
+#
+# def get_cards_report(app):
+#     getter = GetMingle()
+#     cards = getter.get_cards_by_properties(["'Scope - Epic' = NUMBER 3788"])
+#     getter.get_info_of_iteration_and_cards(None, cards, app)
+#     getter.format_index(None, cards)
+#     getter.save_result('People-Talk-Cards')
 
 
 if __name__ == '__main__':
-    get_iteration_report()
+    def start(btn):
+        app.disableButton('Start')
+        iteration_name = app.getOptionBox("iteration_value")
+        getter.__init__()
+        task_running = threading.Thread(target=get_iteration_report, args=[getter, iteration_name])
+        task_running.start()
+
+    def update_meter():
+        app.setMeter("progress", getter.progress)
+        if getter.progress == 100:
+            app.enableButton('Start')
+
+    iterations = GetMingle().get_cards_by_properties(["'Type' = 'Iteration' ORDER BY number DESC"])[:10]
+    iteration_names = [i.title for i in iterations]
+    getter = GetMingle()
+    app = appJar.gui('Get Mingle')
+    app.setGuiPadding(30, 30)
+    app.setPadding(10, 10)
+    app.addLabel('iteration_label', 'Iteration', 0, 0)
+    app.addOptionBox('iteration_value', iteration_names, 0, 1)
+    app.setOptionBox('iteration_value', 1)
+    app.addButton('Start', start, 3, 0)
+    app.addMeter('progress', 3, 1)
+    app.setMeterFill('progress', '#4fc3f7')
+    app.registerEvent(update_meter)
+    app.go()
+
+    # get_iteration_report()
     # get_cards_report()
