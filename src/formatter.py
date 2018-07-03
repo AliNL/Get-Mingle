@@ -196,7 +196,7 @@ class Formatter:
                 tr_tag.append(self._new_tag('td'))
             td_tag = self._new_tag('td')
             tr_tag.append(td_tag)
-            td_tag.append(self._new_tag('span', datetime.fromtimestamp(this_time).strftime('%Y-%m-%d %H:%M')))
+            td_tag.append(self._new_tag('span', datetime.utcfromtimestamp(this_time).strftime('%Y-%m-%d %H:%M')))
             h5 = self._new_tag('h5', dic={'class': movements[this_time][0]})
             td_tag.append(h5)
             for string in movements[this_time][1:]:

@@ -68,7 +68,7 @@ class Card:
             this_status = self.history[this_time]
             if this_status[0] != 'status':
                 continue
-            this_time = datetime.fromtimestamp(this_time)
+            this_time = datetime.utcfromtimestamp(this_time)
             if this_status[1] in self.durations:
                 time_delta = calculate_days_from_time(last_time, this_time)
                 self.durations[this_status[1]] += time_delta
@@ -89,7 +89,8 @@ class Card:
 
 def get_change_from_entry(entry):
     this_time = entry.find('updated').string
-    this_time = int(datetime.strptime(this_time, '%Y-%m-%dT%H:%M:%SZ').strftime("%s"))
+    from datetime import timezone
+    this_time = int(datetime.strptime(this_time, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=timezone.utc).timestamp())
     author = entry.author.find('name').string
     found_status = entry.find('name', text='Status')
     if found_status:
