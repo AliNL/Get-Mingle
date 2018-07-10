@@ -145,7 +145,7 @@
             width: 100%;
         }
 
-        table td, table th {
+        div.status-duration-info table td, table th {
             font-size: 14px;
             padding: 5px 15px;
             overflow: hidden;
@@ -187,10 +187,136 @@
             background-color: rgba(255, 213, 79, 0.7);
         }
 
-        div.unusual-cards-sub-section a, div.unusual-cards-sub-section span {
-            margin: 5px 10px;
+        div.unusual-cards-sub-section button, div.unusual-cards-sub-section span {
+            margin: 0 5px;
+            background-color: transparent;
+            border: none;
+            font-size: 14px;
+            line-height: 24px;
+            text-align: left;
+            padding: 5px;
         }
 
+        div.unusual-cards-sub-section button:hover {
+            cursor: pointer;
+            background-color: rgba(60, 60, 60, 0.2);
+        }
+
+        div.popup-cover {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: rgba(60, 60, 60, 0.8);
+            height: 100%;
+            width: 100%;
+        }
+
+        div.popup {
+            background-color: white;
+            width: 80%;
+            min-width: 500px;
+            max-width: 800px;
+            margin: 10% auto;
+            position: relative;
+            padding-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 70%;
+            max-height: 500px;
+        }
+
+        div.header-area {
+            padding-left: 20px;
+        }
+
+        div.header-area span.close {
+            float: right;
+            background-color: lightgray;
+            width: 24px;
+            height: 24px;
+            text-align: center;
+            line-height: 24px;
+            margin: 0 0 0 10px;
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        div.header-area span.close:hover {
+            background-color: #c0c0c0;
+            cursor: pointer;
+        }
+
+        div.header-area span.number {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 10px 0 0;
+            line-height: 50px;
+        }
+
+        div.header-area span.title {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        div.history-area {
+            overflow-y: auto;
+            overflow-x: hidden;
+            border-top: solid gray 1px;
+            margin: 10px 20px;
+            padding: 10px;
+        }
+
+        div.history-area table {
+            border-collapse: collapse;
+            table-layout: fixed;
+
+        }
+
+        div.history-area table td {
+            padding-right: 0;
+            padding-left: 0;
+        }
+
+        div.history-area table span {
+            font-size: 12px;
+            color: gray;
+        }
+
+        div.history-area td:first-child {
+            text-align: right;
+            width: 40%;
+            border-right: solid gray 2px;
+        }
+
+        div.history-area table h5 {
+            display: block;
+            padding: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0;
+            white-space: normal;
+        }
+
+        div.history-area table h5 p {
+            margin: 5px;
+        }
+
+        div.history-area table h5.forward {
+            background-color: rgba(174, 213, 129, 0.8);
+        }
+
+        div.history-area table h5.backward {
+            background-color: rgba(229, 115, 115, 0.8);
+        }
+
+        div.history-area table h5.murmur {
+            background-color: rgba(79, 195, 247, 0.8);
+        }
+
+        div.history-area table h5.description {
+            background-color: rgba(255, 183, 77, 0.8);
+        }
 
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.4/moment.min.js"></script>
@@ -234,11 +360,11 @@
         <div class="unusual-cards-section">
             <div class="unusual-cards-sub-section left">
                 <h3>Cards moved back</h3>
-                <span>No card!</span>
+                <span class="no-card">No card!</span>
             </div>
             <div class="unusual-cards-sub-section right">
                 <h3>Cards changed description</h3>
-                <span>No card!</span>
+                <span class="no-card">No card!</span>
             </div>
         </div>
     </div>
@@ -265,7 +391,7 @@
 </div>
 <script type="text/javascript">
     function calculate_sum() {
-        $('tr').each(function (tr_idx) {
+        $('tr.duration').each(function (tr_idx) {
             if (tr_idx > 0) {
                 var sum = 0;
                 $(this).find('td, th').each(function (td_idx) {
@@ -277,7 +403,18 @@
             }
         });
     }
+
     $(document).ready(function () {
+        $('div.unusual-cards-sub-section button').click(function () {
+            var name = $(this).attr('name');
+            $('html')[0].style['overflow'] = 'hidden';
+            $('div#' + name).show();
+        });
+        $('span.close').click(function () {
+            var name = $(this).attr('name');
+            $('html')[0].style['overflow'] = 'auto';
+            $('div#' + name).hide();
+        });
         $('div.switch-box').click(function () {
             $('button.switch-box-btn').toggleClass('selected');
             $('div.status-duration-info').toggle();
@@ -289,7 +426,7 @@
                 checkBox.toggleClass('removed');
                 statusDurationsChart.data.datasets[statusId].hidden = !!checkBox.hasClass('removed');
                 statusDurationsChart.update();
-                var cells = $('th:nth-child(' + (statusId + 4) + '),td:nth-child(' + (statusId + 4) + ')');
+                var cells = $('th.duration:nth-child(' + (statusId + 4) + '),td.duration:nth-child(' + (statusId + 4) + ')');
                 cells.toggleClass('hide');
                 cells.toggle(200);
                 calculate_sum();

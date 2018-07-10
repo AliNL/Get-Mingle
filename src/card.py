@@ -3,14 +3,17 @@ from datetime import datetime, time, timedelta
 
 
 class Card:
-    def __init__(self, number, title, points, interested_status, key_status):
+    def __init__(self, number, title, points, interested_status, key_status, requester, time_zone):
         self.number = number
         self.title = title
         self.points = points
         self.changes = []
         self.key_status = key_status
+        self.requester = requester
+        self.time_zone = time_zone
         self.history = {}
         self.movement = []
+        self.movements = {}
         self.interested_status = interested_status
         self.durations = {status: 0 for status in interested_status}
         self.moved_back = False
@@ -19,7 +22,7 @@ class Card:
     def init(self):
         self.get_history_from_changes()
         self.get_durations_from_history()
-        self.get_movement_from_history()
+        self.get_movements_from_history()
         self.get_extra_info_from_history()
 
     def get_history_from_changes(self):
@@ -27,47 +30,76 @@ class Card:
             this_time, this_change = get_change_from_entry(entry)
             if this_time:
                 self.history[this_time] = this_change
+        self.get_murmurs()
 
-    def get_movement_from_history(self):
-        farther_status = 0
-        for change in self.history.values():
-            if change in self.interested_status:
-                this_status = self.interested_status.index(change)
-                if this_status >= farther_status:
-                    farther_status = this_status
-                elif change == self.key_status:
-                    self.moved_back = True
-                self.movement.append(change)
+    def get_movements_from_history(self):
+        last_status = -1
+        last_change = None
+        last_time = list(self.history.keys())[0]
+        for i in range(1, len(self.history)):
+            this_time = list(self.history.keys())[i]
+            this_change = self.history[this_time]
+            if this_change[0] == 'status' and this_change[1] in self.interested_status:
+                this_status = self.interested_status.index(this_change[1])
+                if last_status != -1:
+                    if this_status > last_status:
+                        self.movements[last_time] = ('forward', last_change[1] + '　⇨　' + this_change[1])
+                    else:
+                        if this_change[1] == self.key_status:
+                            self.moved_back = True
+                        self.movements[last_time] = ('backward', this_change[1] + '　⇦　' + last_change[1])
+                last_status = this_status
+                last_change = this_change
+            elif this_change[0] == 'murmur':
+                self.movements[last_time] = this_change
+            last_time = this_time
 
     def get_extra_info_from_history(self):
         get_to_the_key_status = False
-        for change in self.history.values():
-            if get_to_the_key_status and change == 'description-change':
+        for this_time in self.history:
+            this_change = self.history[this_time]
+            if get_to_the_key_status and this_change[0] == 'description':
+                self.movements[this_time] = this_change
                 self.description_changed = True
-            if change == self.key_status:
+            if this_change[1] == self.key_status:
                 get_to_the_key_status = True
 
     def get_durations_from_history(self):
         last_time = None
         for this_time in self.history:
             this_status = self.history[this_time]
-            if this_status == 'description-change':
+            if this_status[0] != 'status':
                 continue
-            this_time = datetime.fromtimestamp(this_time)
-            if this_status in self.durations:
+            this_time = datetime.utcfromtimestamp(this_time)
+            if this_status[1] in self.durations:
                 time_delta = calculate_days_from_time(last_time, this_time)
-                self.durations[this_status] += time_delta
+                self.durations[this_status[1]] += time_delta
             last_time = this_time
+
+    def get_murmurs(self):
+        from bs4 import BeautifulSoup
+        xml = self.requester.get_murmurs(self.number)
+        murmurs = BeautifulSoup(xml, 'xml')
+        for murmur in murmurs.find_all('murmur'):
+            this_time = datetime.strptime(murmur.created_at.string, '%Y-%m-%dT%H:%M:%SZ') + timedelta(
+                hours=int(self.time_zone))
+            from datetime import timezone
+            this_time = int(this_time.replace(tzinfo=timezone.utc).timestamp())
+            author = murmur.author.find('name').string
+            body = murmur.body.string
+            self.movements[this_time] = ('murmur', author + ':', body)
 
 
 def get_change_from_entry(entry):
     this_time = entry.find('updated').string
-    this_time = int(datetime.strptime(this_time, '%Y-%m-%dT%H:%M:%SZ').strftime("%s"))
+    from datetime import timezone
+    this_time = int(datetime.strptime(this_time, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=timezone.utc).timestamp())
+    author = entry.author.find('name').string
     found_status = entry.find('name', text='Status')
     if found_status:
-        return this_time, found_status.find_next('old_value').string
+        return this_time, ('status', found_status.find_next('old_value').string)
     elif entry.find('change', type='description-change'):
-        return this_time, 'description-change'
+        return this_time, ('description', author + ':', 'description change')
     return None, None
 
 
@@ -84,6 +116,8 @@ def calculate_days_from_time(last_time, this_time):
         if operator.xor(time_pointer.weekday() < 5, time_pointer in holidays):
             timed_delta += timedelta(0, 32400)
         time_pointer += timedelta(1)
+    if last_time.date() == this_time.date():
+        timed_delta -= timedelta(0, 32400)
     return round(timed_delta.total_seconds() / (3600 * 9), 2)
 
 
