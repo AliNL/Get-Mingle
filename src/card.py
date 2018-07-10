@@ -35,6 +35,7 @@ class Card:
     def get_movements_from_history(self):
         last_status = -1
         last_change = None
+        last_time = list(self.history.keys())[0]
         for i in range(1, len(self.history)):
             this_time = list(self.history.keys())[i]
             this_change = self.history[this_time]
@@ -42,15 +43,16 @@ class Card:
                 this_status = self.interested_status.index(this_change[1])
                 if last_status != -1:
                     if this_status > last_status:
-                        self.movements[this_time] = ('forward', last_change[1] + '　⇨　' + this_change[1])
+                        self.movements[last_time] = ('forward', last_change[1] + '　⇨　' + this_change[1])
                     else:
                         if this_change[1] == self.key_status:
                             self.moved_back = True
-                        self.movements[this_time] = ('backward', this_change[1] + '　⇦　' + last_change[1])
+                        self.movements[last_time] = ('backward', this_change[1] + '　⇦　' + last_change[1])
                 last_status = this_status
                 last_change = this_change
             elif this_change[0] == 'murmur':
-                self.movements[this_time] = this_change
+                self.movements[last_time] = this_change
+            last_time = this_time
 
     def get_extra_info_from_history(self):
         get_to_the_key_status = False
@@ -81,7 +83,8 @@ class Card:
         for murmur in murmurs.find_all('murmur'):
             this_time = datetime.strptime(murmur.created_at.string, '%Y-%m-%dT%H:%M:%SZ') + timedelta(
                 hours=int(self.time_zone))
-            this_time = int(this_time.strftime("%s"))
+            from datetime import timezone
+            this_time = int(this_time.replace(tzinfo=timezone.utc).timestamp())
             author = murmur.author.find('name').string
             body = murmur.body.string
             self.movements[this_time] = ('murmur', author + ':', body)
