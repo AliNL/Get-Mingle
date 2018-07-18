@@ -15,11 +15,13 @@
       "Dev done",
       "QA",
       "QA done",
-      "Live"
+      "Live",
+      "Done"
     ],
     "query_cards_in": [
       "QA done",
-      "Live"
+      "Live",
+      "Done"
     ],
     "calculate_days_for": [
       "In Progress",
