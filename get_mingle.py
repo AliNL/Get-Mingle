@@ -48,12 +48,12 @@ class GetMingle:
         self.progress = 1
         query_status = '(' + str(self.query_cards_in)[1:-1] + ')'
         xml = self.requester.get_cards_by_mql(
-            "SELECT Number,Name,'Estimated Points','Created On' "
+            "SELECT Number,Name,'Size','Created On' "
             + "where Status in " + query_status + " and Iteration = '" + iteration.title + "'")
         return self.get_cards_from_xml(xml)
 
     def get_cards_by_properties(self, properties):
-        mql = "SELECT Number,Name,'Estimated Points','Created On' where "
+        mql = "SELECT Number,Name,'Size','Created On' where "
         xml = self.requester.get_cards_by_mql(mql + " and ".join(properties))
         return self.get_cards_from_xml(xml)
 
@@ -65,7 +65,7 @@ class GetMingle:
         for result in soup.find_all('result'):
             number = result.find('number').string
             title = result.find('name').string
-            points = result.find('estimated_points').string
+            points = result.find('size').string
             this_date = datetime.strptime(result.find('created_on').string, '%Y-%m-%d')
             self.oldest_date = this_date if this_date < self.oldest_date else self.oldest_date
             cards.append(Card(number, title, points, self.status, self.key_status, self.requester, self.time_zone))
@@ -164,9 +164,9 @@ if __name__ == '__main__':
         if getter.progress == 100:
             app.enableButton('Start')
 
-    iteration_name = ''
-    start_date = ''
-    end_date = ''
+    iteration_name = 'Iteration 4. 2018-07-04 to 2018-07-17'
+    start_date = '2018-07-04'
+    end_date = '2018-07-17'
     getter = GetMingle()
     app = appJar.gui('Get Mingle')
     app.setGuiPadding(30, 30)
@@ -179,3 +179,7 @@ if __name__ == '__main__':
     app.registerEvent(update_meter)
     app.go()
 
+# iteration_name = 'Iteration 1. 2018-05-28 to 2018-06-05'
+# iteration_name = 'Iteration 2. 2018-06-06 to 2018-06-19'
+# iteration_name = 'Iteration 3. 2018-06-20 to 2018-07-03'
+# iteration_name = 'Iteration 4. 2018-07-04 to 2018-07-17'
