@@ -14,3 +14,8 @@
 ## Set up
 1. brew install python3
 1. pip3 install -r requirements.txt
+
+## Tips
+1. move cards at time
+2. move cards through all stages
+3. estimation

@@ -7,34 +7,32 @@
   },
   "query_info": {
     "time_zone": 8,
-    "key_status": "In-Progress",
+    "key_status": "In Progress",
     "status": [
-      "Backlog",
       "Blocked",
-      "In analysis",
-      "Analysis complete",
-      "Ready for Dev",
-      "In-Progress",
-      "Dev complete",
-      "Ready for QA",
-      "In QA",
-      "QA complete"
+      "To Do",
+      "In Progress",
+      "Dev done",
+      "QA",
+      "QA done",
+      "Live",
+      "Done"
     ],
     "query_cards_in": [
-      "Deployed to Prod",
+      "QA done",
+      "Live",
       "Done"
     ],
     "calculate_days_for": [
-      "In-Progress",
-      "In QA"
+      "In Progress",
+      "QA"
     ],
     "calculate_steps_for": [
-      "Ready for Dev",
-      "In-Progress",
-      "Dev complete",
-      "Ready for QA",
-      "In QA",
-      "QA complete"
+      "To Do",
+      "In Progress",
+      "Dev done",
+      "QA",
+      "QA done"
     ]
   }
 }
